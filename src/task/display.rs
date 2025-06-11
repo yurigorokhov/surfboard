@@ -1,17 +1,24 @@
 use core::cell::RefCell;
 
+use crate::{draw::draw_loading_screen, system::resources::ScreenResources};
+use defmt::*;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDeviceWithConfig;
 use embassy_rp::{
-    gpio::{Input, Level, Output, Pin, Pull},
+    gpio::{Input, Level, Output, Pull},
     peripherals::SPI0,
     spi::{self, Blocking},
-    Peripheral,
 };
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::blocking_mutex::Mutex;
 use embassy_time::Delay;
+use embassy_time::{Duration, Timer};
+use embedded_graphics::{
+    prelude::*,
+    primitives::{Circle, PrimitiveStyle, Rectangle},
+};
 use epd_waveshare::epd7in5b_v3::Epd7in5;
 use epd_waveshare::prelude::WaveshareDisplay;
+use epd_waveshare::{color::TriColor, epd7in5b_v3::Display7in5};
 use static_cell::StaticCell;
 
 #[derive(Debug)]
@@ -23,7 +30,14 @@ pub trait Screen {
     fn power_on(&mut self);
     fn power_off(&mut self);
     fn draw(&mut self, buffer: &[u8]) -> Result<(), ScreenError>;
+    fn draw_partial(&mut self, buffer: &[u8], x: u32, y: u32, width: u32, height: u32) -> Result<(), ScreenError>;
     fn sleep(&mut self) -> Result<(), ScreenError>;
+
+    fn sleep_and_power_off(&mut self) -> Result<(), ScreenError> {
+        self.sleep()?;
+        self.power_off();
+        Ok(())
+    }
 }
 
 pub struct WaveshareScreen<'a, S>
@@ -61,32 +75,51 @@ where
             .update_and_display_frame(self.spi_device, buffer, &mut self.delay)
             .map_err(|_| ScreenError::SpiError)?)
     }
+
+    fn draw_partial(&mut self, buffer: &[u8], x: u32, y: u32, width: u32, height: u32) -> Result<(), ScreenError> {
+        Ok(self
+            .epd
+            .update_partial_frame2(self.spi_device, buffer, x, y, width, height, &mut self.delay)
+            .map_err(|_| ScreenError::SpiError)?)
+    }
 }
 
-pub fn init_display<MOSI, CLOCK>(
-    spi: SPI0,
-    mosi: MOSI,
-    clk: CLOCK,
-    command_selection_pin: impl Peripheral<P = impl Pin> + 'static,
-    display_power_pin: impl Peripheral<P = impl Pin> + 'static,
-    display_busy_pin: impl Peripheral<P = impl Pin> + 'static,
-    display_data_command_pin: impl Peripheral<P = impl Pin> + 'static,
-    display_reset_pin: impl Peripheral<P = impl Pin> + 'static,
+#[embassy_executor::task]
+pub async fn start(r: ScreenResources) {
+    debug!("Initializing display");
+    let mut display = init_display(r);
+
+    // draw something
+    let mut canvas = Display7in5::default();
+    canvas.clear(epd_waveshare::color::TriColor::White).unwrap();
+
+    debug!("Drawing loading screen");
+    draw_loading_screen(&mut canvas).expect("Failed to draw splash screen");
+    display.draw(canvas.buffer()).expect("Failed to draw on screen");
+
+    // TEST: partial update for circle
+    canvas.clear(epd_waveshare::color::TriColor::Chromatic).unwrap();
+    display
+        .draw_partial(canvas.buffer(), 100, 100, 100, 100)
+        .expect("Failed to draw partial");
+
+    Timer::after(Duration::from_secs(10)).await;
+    debug!("task exit");
+    display.sleep_and_power_off().expect("Failed to put screen to sleep");
+}
+
+fn init_display(
+    r: ScreenResources,
 ) -> WaveshareScreen<
     'static,
     SpiDeviceWithConfig<'static, NoopRawMutex, spi::Spi<'static, SPI0, Blocking>, Output<'static>>,
->
-where
-    MOSI: spi::MosiPin<SPI0>,
-    CLOCK: spi::ClkPin<SPI0>,
-{
+> {
     let mut display_config = spi::Config::default();
     display_config.frequency = 4_000_000u32;
     display_config.phase = spi::Phase::CaptureOnSecondTransition;
     display_config.polarity = spi::Polarity::IdleHigh;
-    let spi = spi::Spi::new_blocking_txonly(spi, clk, mosi, display_config.clone());
-    static BUS: StaticCell<Mutex<NoopRawMutex, RefCell<spi::Spi<'static, SPI0, Blocking>>>> =
-        StaticCell::new();
+    let spi = spi::Spi::new_blocking_txonly(r.spi, r.clk, r.mosi, display_config.clone());
+    static BUS: StaticCell<Mutex<NoopRawMutex, RefCell<spi::Spi<'static, SPI0, Blocking>>>> = StaticCell::new();
     let spi_bus = &*BUS.init(Mutex::new(RefCell::new(spi)));
 
     static SPI_DEVICE: StaticCell<
@@ -94,12 +127,15 @@ where
     > = StaticCell::new();
     let spi_device = &mut *SPI_DEVICE.init(SpiDeviceWithConfig::new(
         &spi_bus,
-        Output::new(command_selection_pin, Level::Low),
+        Output::new(r.command_selection_pin, Level::Low),
         display_config,
     ));
-    let display_reset = Output::new(display_reset_pin, Level::Low);
-    let display_data_command = Output::new(display_data_command_pin, Level::Low);
-    let display_busy = Input::new(display_busy_pin, Pull::Down);
+    let display_reset = Output::new(r.display_reset_pin, Level::Low);
+    let display_data_command = Output::new(r.display_data_command_pin, Level::Low);
+    let display_busy = Input::new(r.display_busy_pin, Pull::Down);
+    let mut display_power = Output::new(r.display_power_pin, Level::Low);
+    display_power.set_high();
+    debug!("display powered on");
     let epd = Epd7in5::new(
         spi_device,
         display_busy,
@@ -112,7 +148,7 @@ where
     WaveshareScreen {
         epd,
         spi_device,
-        power_output: Output::new(display_power_pin, Level::Low),
+        power_output: display_power,
         delay: Delay {},
     }
 }

@@ -99,8 +99,7 @@ impl ClientTrait for Client {
         let buffer = response.body().read_to_end().await?;
 
         debug!("Read {} bytes", buffer.len());
-        let output =
-            Vec::<u8, RESPONSE_SIZE>::from_slice(buffer).map_err(|()| Error::ResponseTooLarge)?;
+        let output = Vec::<u8, RESPONSE_SIZE>::from_slice(buffer).map_err(|()| Error::ResponseTooLarge)?;
 
         Ok(output)
     }
