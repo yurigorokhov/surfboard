@@ -14,11 +14,14 @@ use system::resources::*;
 
 mod task;
 use embassy_executor::Executor;
-use embassy_rp::multicore::{spawn_core1, Stack};
+use embassy_rp::multicore::{Stack, spawn_core1};
 use task::display;
 use task::orchestrate;
 use task::wifi;
 mod draw;
+
+// TODO: remove
+use surfboard_lib::add;
 
 mod http;
 use self::http::Client as HttpClient;
