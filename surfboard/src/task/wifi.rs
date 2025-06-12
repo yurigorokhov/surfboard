@@ -1,9 +1,9 @@
 use core::str::FromStr;
 use cyw43::JoinOptions;
-use cyw43_pio::{PioSpi, DEFAULT_CLOCK_DIVIDER};
+use cyw43_pio::{DEFAULT_CLOCK_DIVIDER, PioSpi};
 use defmt::*;
 use embassy_executor::Spawner;
-use embassy_net::{new as new_stack, Config as NetConfig, DhcpConfig, Runner, Stack, StackResources};
+use embassy_net::{Config as NetConfig, DhcpConfig, Runner, Stack, StackResources, new as new_stack};
 use embassy_rp::gpio::{Level, Output};
 use embassy_time::{Duration, Instant, Timer};
 
@@ -14,7 +14,7 @@ use rand_core::RngCore;
 use static_cell::StaticCell;
 
 use crate::random::RngWrapper;
-use crate::system::event::{send_event, Events};
+use crate::system::event::{Events, send_event};
 use crate::system::resources::{Irqs, WifiResources};
 
 #[embassy_executor::task]

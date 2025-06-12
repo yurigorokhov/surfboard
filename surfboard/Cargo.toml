@@ -3,7 +3,6 @@ edition = "2024"
 name = "surfboard"
 version = "0.1.0"
 license = "Apache-2.0"
-resolver = "2"
 
 
 [dependencies]

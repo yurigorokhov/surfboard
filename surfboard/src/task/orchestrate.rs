@@ -1,5 +1,6 @@
 use defmt::{error, info};
 use heapless::String;
+use surfboard_lib::DisplayAction;
 
 use crate::{
     system::event::{send_event, wait, Events},
@@ -21,13 +22,13 @@ async fn process_event(event: Events) {
         Events::WifiConnected(addr) => {
             let mut txt: String<20> = String::new();
             let _ = write!(txt, "IP: {}", addr);
-            display_update(crate::draw::DisplayAction::ShowStatusText(txt)).await;
+            display_update(DisplayAction::ShowStatusText(txt)).await;
         }
         Events::WifiDhcpError => {
             error!("Event: WifiDhcpError");
             let mut txt: String<20> = String::new();
             let _ = write!(txt, "DHCP error");
-            display_update(crate::draw::DisplayAction::ShowStatusText(txt)).await;
+            display_update(DisplayAction::ShowStatusText(txt)).await;
         }
     }
 }

@@ -4,3 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+embedded-graphics = "0.8.1"
+epd-waveshare = "0.6.0"
+heapless = "0.8.0"
+
+
+[dev-dependencies]
+embedded-graphics-simulator = "0.7.0"

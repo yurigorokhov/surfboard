@@ -1,6 +1,6 @@
 use core::cell::RefCell;
 
-use crate::{draw::DisplayAction, system::resources::ScreenResources};
+use crate::system::resources::ScreenResources;
 use defmt::*;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDeviceWithConfig;
 use embassy_rp::{
@@ -8,8 +8,8 @@ use embassy_rp::{
     peripherals::SPI0,
     spi::{self, Blocking},
 };
-use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::blocking_mutex::Mutex;
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use embassy_time::Delay;
 use embedded_graphics::prelude::*;
@@ -17,6 +17,7 @@ use epd_waveshare::epd7in5b_v3::Display7in5;
 use epd_waveshare::epd7in5b_v3::Epd7in5;
 use epd_waveshare::prelude::WaveshareDisplay;
 use static_cell::StaticCell;
+use surfboard_lib::DisplayAction;
 
 pub static DISPLAY_CHANNEL: Channel<CriticalSectionRawMutex, DisplayAction, 4> = Channel::new();
 
