@@ -14,6 +14,7 @@ use rand_core::RngCore;
 use static_cell::StaticCell;
 
 use crate::random::RngWrapper;
+use crate::system::event::{send_event, Events};
 use crate::system::resources::{Irqs, WifiResources};
 
 #[embassy_executor::task]
@@ -107,7 +108,10 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
     }
 
     match stack.config_v4() {
-        Some(a) => info!("IP Address appears to be: {}", a.address),
+        Some(a) => {
+            info!("IP Address appears to be: {}", a.address);
+            send_event(Events::WifiConnected(a.address.address())).await;
+        }
         None => core::panic!("DHCP completed but no IP address was assigned!"),
     }
     debug!("Wifi setup!");

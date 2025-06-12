@@ -1,6 +1,6 @@
 use core::cell::RefCell;
 
-use crate::{draw::draw_loading_screen, system::resources::ScreenResources};
+use crate::{draw::DisplayAction, system::resources::ScreenResources};
 use defmt::*;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDeviceWithConfig;
 use embassy_rp::{
@@ -10,16 +10,25 @@ use embassy_rp::{
 };
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 use embassy_sync::blocking_mutex::Mutex;
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use embassy_time::Delay;
-use embassy_time::{Duration, Timer};
-use embedded_graphics::{
-    prelude::*,
-    primitives::{Circle, PrimitiveStyle, Rectangle},
-};
+use embedded_graphics::prelude::*;
+use epd_waveshare::epd7in5b_v3::Display7in5;
 use epd_waveshare::epd7in5b_v3::Epd7in5;
 use epd_waveshare::prelude::WaveshareDisplay;
-use epd_waveshare::{color::TriColor, epd7in5b_v3::Display7in5};
 use static_cell::StaticCell;
+
+pub static DISPLAY_CHANNEL: Channel<CriticalSectionRawMutex, DisplayAction, 4> = Channel::new();
+
+/// Requests a display update with the specified action
+pub async fn display_update(display_action: DisplayAction) {
+    DISPLAY_CHANNEL.send(display_action).await;
+}
+
+/// Blocks until next update request, returns the requested display action
+async fn wait() -> DisplayAction {
+    DISPLAY_CHANNEL.receive().await
+}
 
 #[derive(Debug)]
 pub enum ScreenError {
@@ -32,6 +41,7 @@ pub trait Screen {
     fn draw(&mut self, buffer: &[u8]) -> Result<(), ScreenError>;
     fn draw_partial(&mut self, buffer: &[u8], x: u32, y: u32, width: u32, height: u32) -> Result<(), ScreenError>;
     fn sleep(&mut self) -> Result<(), ScreenError>;
+    fn wake_up(&mut self) -> Result<(), ScreenError>;
 
     fn sleep_and_power_off(&mut self) -> Result<(), ScreenError> {
         self.sleep()?;
@@ -55,17 +65,28 @@ where
     S: embedded_hal::spi::SpiDevice,
 {
     fn power_on(&mut self) {
-        self.power_output.set_high();
+        if self.power_output.is_set_low() {
+            self.power_output.set_high();
+        }
     }
 
     fn power_off(&mut self) {
-        self.power_output.set_low();
+        if self.power_output.is_set_high() {
+            self.power_output.set_low();
+        }
     }
 
     fn sleep(&mut self) -> Result<(), ScreenError> {
         Ok(self
             .epd
             .sleep(self.spi_device, &mut self.delay)
+            .map_err(|_| ScreenError::SpiError)?)
+    }
+
+    fn wake_up(&mut self) -> Result<(), ScreenError> {
+        Ok(self
+            .epd
+            .wake_up(self.spi_device, &mut self.delay)
             .map_err(|_| ScreenError::SpiError)?)
     }
 
@@ -89,23 +110,18 @@ pub async fn start(r: ScreenResources) {
     debug!("Initializing display");
     let mut display = init_display(r);
 
-    // draw something
+    // clear display
     let mut canvas = Display7in5::default();
     canvas.clear(epd_waveshare::color::TriColor::White).unwrap();
 
-    debug!("Drawing loading screen");
-    draw_loading_screen(&mut canvas).expect("Failed to draw splash screen");
-    display.draw(canvas.buffer()).expect("Failed to draw on screen");
-
-    // TEST: partial update for circle
-    canvas.clear(epd_waveshare::color::TriColor::Chromatic).unwrap();
-    display
-        .draw_partial(canvas.buffer(), 100, 100, 100, 100)
-        .expect("Failed to draw partial");
-
-    Timer::after(Duration::from_secs(10)).await;
-    debug!("task exit");
-    display.sleep_and_power_off().expect("Failed to put screen to sleep");
+    loop {
+        // Wait for the next display update request and clear the display
+        display.wake_up().expect("Failed to wake up");
+        let display_action = wait().await;
+        display_action.draw(&mut canvas).expect("Failed to draw splash screen");
+        display.draw(canvas.buffer()).expect("Failed to draw on screen");
+        display.sleep().expect("Failed to put screen to sleep");
+    }
 }
 
 fn init_display(

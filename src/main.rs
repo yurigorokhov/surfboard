@@ -2,8 +2,7 @@
 #![no_main]
 
 use defmt::*;
-use embassy_executor::Spawner;
-use embassy_time::{Duration, Timer};
+use static_cell::StaticCell;
 
 use {defmt_rtt as _, panic_probe as _};
 
@@ -14,33 +13,40 @@ mod system;
 use system::resources::*;
 
 mod task;
+use embassy_executor::Executor;
+use embassy_rp::multicore::{spawn_core1, Stack};
 use task::display;
+use task::orchestrate;
 use task::wifi;
-
 mod draw;
 
 mod http;
 use self::http::Client as HttpClient;
 use self::http::ClientTrait;
 
-// #[cortex_m_rt::pre_init]
-// unsafe fn before_main() {
-//     // Soft-reset doesn't clear spinlocks. Clear the one used by critical-section
-//     // before we hit main to avoid deadlocks when using a debugger
-//     embassy_rp::pac::SIO.spinlock(31).write_value(1);
-// }
+static mut CORE1_STACK: Stack<4096> = Stack::new();
+static EXECUTOR0: StaticCell<Executor> = StaticCell::new();
+static EXECUTOR1: StaticCell<Executor> = StaticCell::new();
 
-#[embassy_executor::main]
-async fn main(spawner: Spawner) {
+#[cortex_m_rt::entry]
+fn main() -> ! {
     info!("Program start");
     let p = embassy_rp::init(Default::default());
     let r = split_resources!(p);
 
-    spawner.spawn(display::start(r.screen)).unwrap();
-    spawner.spawn(wifi::start(r.wifi, spawner)).unwrap();
+    // run display on separate thread
+    spawn_core1(
+        p.CORE1,
+        unsafe { &mut *core::ptr::addr_of_mut!(CORE1_STACK) },
+        move || {
+            let executor1 = EXECUTOR1.init(Executor::new());
+            executor1.run(|spawner| unwrap!(spawner.spawn(display::start(r.screen))));
+        },
+    );
 
-    loop {
-        debug!("Main Loop");
-        Timer::after(Duration::from_secs(10)).await;
-    }
+    let executor0 = EXECUTOR0.init(Executor::new());
+    executor0.run(|spawner| {
+        spawner.spawn(orchestrate::start()).unwrap();
+        spawner.spawn(wifi::start(r.wifi, spawner)).unwrap();
+    });
 }
