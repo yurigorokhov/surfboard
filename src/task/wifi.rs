@@ -5,7 +5,7 @@ use defmt::*;
 use embassy_executor::Spawner;
 use embassy_net::{new as new_stack, Config as NetConfig, DhcpConfig, Runner, Stack, StackResources};
 use embassy_rp::gpio::{Level, Output};
-use embassy_time::{Instant, Timer};
+use embassy_time::{Duration, Instant, Timer};
 
 use embassy_rp::peripherals::{DMA_CH0, PIO0};
 use embassy_rp::pio::Pio;
@@ -112,7 +112,9 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
             info!("IP Address appears to be: {}", a.address);
             send_event(Events::WifiConnected(a.address.address())).await;
         }
-        None => core::panic!("DHCP completed but no IP address was assigned!"),
+        None => {
+            send_event(Events::WifiDhcpError).await;
+        }
     }
     debug!("Wifi setup!");
 }

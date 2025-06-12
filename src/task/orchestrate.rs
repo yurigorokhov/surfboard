@@ -23,8 +23,11 @@ async fn process_event(event: Events) {
             let _ = write!(txt, "IP: {}", addr);
             display_update(crate::draw::DisplayAction::ShowStatusText(txt)).await;
         }
-        Events::WifiError => {
-            error!("Event: Wifi did not connect")
+        Events::WifiDhcpError => {
+            error!("Event: WifiDhcpError");
+            let mut txt: String<20> = String::new();
+            let _ = write!(txt, "DHCP error");
+            display_update(crate::draw::DisplayAction::ShowStatusText(txt)).await;
         }
     }
 }

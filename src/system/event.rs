@@ -57,5 +57,5 @@ pub async fn wait() -> Events {
 #[derive(Debug, Clone)]
 pub enum Events {
     WifiConnected(Ipv4Addr),
-    WifiError,
+    WifiDhcpError,
 }
