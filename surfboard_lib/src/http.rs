@@ -27,7 +27,7 @@ pub struct TidePredictions {
 }
 
 pub async fn tide_data<'a, T: HttpDataProvider>(client: &'a T, buffer: &'a mut [u8]) -> Option<TidePredictions> {
-    let url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9413450&product=predictions&datum=STND&time_zone=lst&interval=h&units=english&format=json";
+    let url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=20250613&range=30&station=9413450&product=predictions&datum=STND&time_zone=lst&interval=h&units=english&format=json";
     let data = client.get_as_json::<TidePredictions>(url, buffer).await;
     data
 }
