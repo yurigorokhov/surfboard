@@ -1,13 +1,24 @@
 use core::fmt::Debug;
 
+use crate::http::TidePredictions;
+use core::fmt::Write;
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
+use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
+use embedded_graphics::primitives::{Line, Polyline, PrimitiveStyle};
 use embedded_graphics::{
     mono_font::MonoTextStyle,
     prelude::*,
     text::{Alignment, LineHeight, Text, TextStyleBuilder},
 };
 use epd_waveshare::color::TriColor;
-use heapless::String;
+use heapless::{String, Vec};
+const TIDE_CHART_X_LEFT: u32 = 20;
+const TIDE_CHART_X_RIGHT: u32 = 780;
+const TIDE_CHART_WIDTH: u32 = TIDE_CHART_X_RIGHT - TIDE_CHART_X_LEFT;
+const TIDE_CHART_Y_TOP: u32 = 200;
+const TIDE_CHART_Y_BOTTOM: u32 = 400;
+const TIDE_Y_HEIGHT: u32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
+const TIDE_DATAPOINTS: usize = 24;
 
 pub enum DisplayAction {
     ShowStatusText(String<20>),
@@ -72,20 +83,70 @@ where
     Ok(())
 }
 
-#[cfg(test)]
-mod tests {
-    use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
+pub fn draw_tide<D, E>(target: &mut D, tide_predictions: &TidePredictions) -> Result<(), E>
+where
+    E: Debug,
+    D: DrawTarget<Color = TriColor, Error = E>,
+{
+    // find max and min
+    let heights: Vec<f32, TIDE_DATAPOINTS> = tide_predictions
+        .predictions
+        .iter()
+        .map(|p| lexical::parse(&p.v).unwrap())
+        .collect();
 
-    use super::*;
-
-    #[test]
-    fn test_loading_screen() {
-        let mut display = SimulatorDisplay::<TriColor>::new(Size::new(800, 480));
-        draw_loading_screen(&mut display).expect("Failed to draw loading screen");
-        let output_settings = OutputSettingsBuilder::new().scale(1).build();
-        let output_image = display.to_grayscale_output_image(&output_settings);
-        output_image
-            .save_png("tests_screenshots/loading_screen.png")
-            .expect("Failed to save test image");
+    let mut min_height: f32 = heights.iter().map(|f| *f).reduce(f32::min).unwrap();
+    let mut max_height: f32 = heights.iter().map(|f| *f).reduce(f32::max).unwrap();
+    let mut negative_adjustment = 0.;
+    if min_height < 0. {
+        negative_adjustment = -min_height;
+        max_height += -min_height;
+        min_height = 0.;
     }
+
+    let mut points: Vec<Point, TIDE_DATAPOINTS> = Vec::new();
+
+    let mut x_axis = TIDE_CHART_X_LEFT;
+    let mut idx = 0;
+    for pred in &tide_predictions.predictions {
+        let height = (heights[idx] + negative_adjustment - min_height) / max_height * TIDE_Y_HEIGHT as f32;
+        let screen_height = TIDE_CHART_Y_TOP + TIDE_Y_HEIGHT - f32::round(height) as u32;
+
+        points.push(Point::new(x_axis as i32, screen_height as i32)).unwrap();
+
+        let text_style = TextStyleBuilder::new()
+            .alignment(Alignment::Left)
+            .line_height(LineHeight::Percent(100))
+            .build();
+        Text::with_text_style(
+            &pred.t[11..13],
+            Point::new(x_axis as i32 - 5, TIDE_CHART_Y_BOTTOM as i32 + 50),
+            MonoTextStyle::new(&FONT_5X8, TriColor::Black),
+            text_style,
+        )
+        .draw(target)?;
+        let mut txt: String<20> = String::new();
+        write!(txt, "{:.1}ft", heights[idx]).unwrap();
+        Text::with_text_style(
+            txt.as_str(),
+            Point::new(x_axis as i32 - 5, screen_height as i32 - 20),
+            MonoTextStyle::new(&FONT_5X8, TriColor::Black),
+            text_style,
+        )
+        .draw(target)?;
+
+        Line::new(
+            Point::new(x_axis as i32, TIDE_CHART_Y_BOTTOM as i32 + 30),
+            Point::new(x_axis as i32, screen_height as i32),
+        )
+        .into_styled(PrimitiveStyle::with_stroke(TriColor::Chromatic, 2))
+        .draw(target)?;
+
+        x_axis += TIDE_CHART_WIDTH / TIDE_DATAPOINTS as u32;
+        idx += 1;
+    }
+    Polyline::new(&points)
+        .into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 3))
+        .draw(target)?;
+    Ok(())
 }

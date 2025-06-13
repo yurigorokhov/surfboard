@@ -1,33 +1,63 @@
-use embedded_nal_async::{Dns, TcpConnect};
-use reqwless::client::HttpClient;
-use reqwless::request::Method;
+use heapless::{String, Vec};
 
-use heapless::Vec;
+use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 
-/// Response size
-const RESPONSE_SIZE: usize = 4096;
-// const TLS_DATA_BUFFER_SIZE: usize = 2048; // 16640
+#[trait_variant::make(HttpService: Send)]
+pub trait HttpDataProvider {
+    async fn get_as_json<'a, DataType: DeserializeOwned>(
+        &'a self,
+        url: &'a str,
+        buffer: &'a mut [u8],
+    ) -> Option<DataType>;
+}
 
-pub async fn tide_data<'a, T, D>(client: &mut HttpClient<'a, T, D>) -> Vec<u8, RESPONSE_SIZE>
-where
-    T: TcpConnect + 'a,
-    D: Dns + 'a,
-{
+/****** Tide predictions ******/
+
+#[derive(Deserialize, Serialize)]
+pub struct TidePredictionsDataPoint {
+    pub t: String<16>,
+    pub v: String<8>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct TidePredictions {
+    pub predictions: Vec<TidePredictionsDataPoint, 24>,
+}
+
+pub async fn tide_data<'a, T: HttpDataProvider>(client: &'a T, buffer: &'a mut [u8]) -> Option<TidePredictions> {
     let url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9413450&product=predictions&datum=STND&time_zone=lst&interval=h&units=english&format=json";
-    let mut buffer = [0_u8; RESPONSE_SIZE];
-    let mut request = client.request(Method::GET, url).await.expect("HTTP ERROR");
-    let response = request.send(&mut buffer).await.expect("HTTP ERROR");
-    let buffer = response.body().read_to_end().await.expect("READ BODY");
-    let output = Vec::<u8, RESPONSE_SIZE>::from_slice(buffer).expect("READ BODY");
-    output
+    let data = client.get_as_json::<TidePredictions>(url, buffer).await;
+    data
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use reqwest;
 
-    #[test]
-    fn test_get_tide_data() {
-        let mut client = HttpClient::new(TokioTcp, StaticDns);
+    struct TestDataProvider {}
+
+    impl HttpDataProvider for TestDataProvider {
+        async fn get_as_json<'a, DataType: DeserializeOwned>(
+            &'a self,
+            url: &'a str,
+            buffer: &'a mut [u8],
+        ) -> Option<DataType> {
+            let response_str = reqwest::get(url).await.ok()?.text().await.ok()?;
+            let response_bytes = response_str.as_bytes();
+            buffer[0..response_bytes.len()].copy_from_slice(response_bytes);
+            let (data, _remainder) = serde_json_core::from_slice::<DataType>(&buffer[0..response_bytes.len()]).unwrap();
+            Some(data)
+        }
+    }
+
+    #[tokio::test]
+    async fn test_get_tide_data() {
+        let http_provider = TestDataProvider {};
+        let mut buffer = [0_u8; 4096];
+        let data = tide_data(&http_provider, &mut buffer).await;
+        assert!(data.is_some());
+        assert!(data.unwrap().predictions.len() > 0);
     }
 }

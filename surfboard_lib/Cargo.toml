@@ -6,10 +6,14 @@ edition = "2021"
 [dependencies]
 embedded-graphics = "0.8.1"
 epd-waveshare = "0.6.0"
-heapless = "0.8.0"
-reqwless = { version = "0.13.0", features = ["alloc", "embedded-tls", "log"] }
-embedded-nal-async = { version = "0.8.0" }
+heapless = { version = "0.8.0", features = ["serde"] }
+serde-json-core = "0.6.0"
+serde = { version = "1.0", default-features = false }
+trait-variant = "0.1.2"
+lexical = "7.0.4"
 
 
 [dev-dependencies]
 embedded-graphics-simulator = { version = "0.7.0", default-features = false }
+reqwest = "0.12.20"
+tokio = { version = "1.45.1", features = ["full"] }
