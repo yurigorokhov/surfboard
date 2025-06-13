@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::http::TidePredictions;
+use crate::http::{TidePredictions, TIDE_PREDICTIONS_LEN};
 use core::fmt::Write;
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
@@ -18,7 +18,6 @@ const TIDE_CHART_WIDTH: u32 = TIDE_CHART_X_RIGHT - TIDE_CHART_X_LEFT;
 const TIDE_CHART_Y_TOP: u32 = 200;
 const TIDE_CHART_Y_BOTTOM: u32 = 400;
 const TIDE_Y_HEIGHT: u32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
-const TIDE_DATAPOINTS: usize = 24;
 
 pub enum DisplayAction {
     ShowStatusText(String<20>),
@@ -89,7 +88,7 @@ where
     D: DrawTarget<Color = TriColor, Error = E>,
 {
     // find max and min
-    let heights: Vec<f32, TIDE_DATAPOINTS> = tide_predictions
+    let heights: Vec<f32, TIDE_PREDICTIONS_LEN> = tide_predictions
         .predictions
         .iter()
         .map(|p| lexical::parse(&p.v).unwrap())
@@ -104,11 +103,17 @@ where
         min_height = 0.;
     }
 
-    let mut points: Vec<Point, TIDE_DATAPOINTS> = Vec::new();
+    let mut points: Vec<Point, TIDE_PREDICTIONS_LEN> = Vec::new();
 
+    // do not show first few hours of the night
+    let skip_first_n = 6;
     let mut x_axis = TIDE_CHART_X_LEFT;
     let mut idx = 0;
     for pred in &tide_predictions.predictions {
+        if idx < skip_first_n - 1 {
+            idx += 1;
+            continue;
+        }
         let height = (heights[idx] + negative_adjustment - min_height) / max_height * TIDE_Y_HEIGHT as f32;
         let screen_height = TIDE_CHART_Y_TOP + TIDE_Y_HEIGHT - f32::round(height) as u32;
 
@@ -142,7 +147,7 @@ where
         .into_styled(PrimitiveStyle::with_stroke(TriColor::Chromatic, 2))
         .draw(target)?;
 
-        x_axis += TIDE_CHART_WIDTH / TIDE_DATAPOINTS as u32;
+        x_axis += TIDE_CHART_WIDTH / (TIDE_PREDICTIONS_LEN - skip_first_n) as u32;
         idx += 1;
     }
     Polyline::new(&points)

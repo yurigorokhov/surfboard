@@ -13,6 +13,7 @@ pub trait HttpDataProvider {
 }
 
 /****** Tide predictions ******/
+pub const TIDE_PREDICTIONS_LEN: usize = 32;
 
 #[derive(Deserialize, Serialize)]
 pub struct TidePredictionsDataPoint {
@@ -22,7 +23,7 @@ pub struct TidePredictionsDataPoint {
 
 #[derive(Deserialize, Serialize)]
 pub struct TidePredictions {
-    pub predictions: Vec<TidePredictionsDataPoint, 24>,
+    pub predictions: Vec<TidePredictionsDataPoint, TIDE_PREDICTIONS_LEN>,
 }
 
 pub async fn tide_data<'a, T: HttpDataProvider>(client: &'a T, buffer: &'a mut [u8]) -> Option<TidePredictions> {
