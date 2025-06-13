@@ -1,0 +1,5 @@
+{
+    "rust-analyzer.check.allTargets": false,
+    "rust-analyzer.checkOnSave": true,
+    "editor.formatOnSave": true
+}
