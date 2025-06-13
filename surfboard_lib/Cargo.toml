@@ -1,13 +1,14 @@
 [package]
 name = "surfboard_lib"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 embedded-graphics = "0.8.1"
 epd-waveshare = "0.6.0"
 heapless = "0.8.0"
+# reqwless = { version = "0.13.0", features = ["alloc", "embedded-tls", "log"] }
 
 
 [dev-dependencies]
-embedded-graphics-simulator = "0.7.0"
+embedded-graphics-simulator = { version = "0.7.0", default-features = false }

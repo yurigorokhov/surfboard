@@ -1,6 +1,6 @@
 use defmt::{error, info};
 use heapless::String;
-use surfboard_lib::DisplayAction;
+use surfboard_lib::draw::DisplayAction;
 
 use crate::{
     system::event::{send_event, wait, Events},

@@ -3,7 +3,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "preLaunchTask": "rust: cargo build",
+            "preLaunchTask": "Cargo Build",
             "type": "probe-rs-debug",
             "request": "launch",
             "name": "surfboard launch",

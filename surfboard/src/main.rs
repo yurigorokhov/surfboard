@@ -19,10 +19,6 @@ use task::display;
 use task::orchestrate;
 use task::wifi;
 
-mod http;
-use self::http::Client as HttpClient;
-use self::http::ClientTrait;
-
 static mut CORE1_STACK: Stack<4096> = Stack::new();
 static EXECUTOR0: StaticCell<Executor> = StaticCell::new();
 static EXECUTOR1: StaticCell<Executor> = StaticCell::new();

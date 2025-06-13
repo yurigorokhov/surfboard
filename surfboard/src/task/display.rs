@@ -17,7 +17,7 @@ use epd_waveshare::epd7in5b_v3::Display7in5;
 use epd_waveshare::epd7in5b_v3::Epd7in5;
 use epd_waveshare::prelude::WaveshareDisplay;
 use static_cell::StaticCell;
-use surfboard_lib::DisplayAction;
+use surfboard_lib::draw::DisplayAction;
 
 pub static DISPLAY_CHANNEL: Channel<CriticalSectionRawMutex, DisplayAction, 4> = Channel::new();
 
