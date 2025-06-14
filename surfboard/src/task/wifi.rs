@@ -1,21 +1,36 @@
 use core::str::FromStr;
 use cyw43::JoinOptions;
-use cyw43_pio::{DEFAULT_CLOCK_DIVIDER, PioSpi};
+use cyw43_pio::{PioSpi, DEFAULT_CLOCK_DIVIDER};
 use defmt::*;
 use embassy_executor::Spawner;
-use embassy_net::{Config as NetConfig, DhcpConfig, Runner, Stack, StackResources, new as new_stack};
+use embassy_net::{new as new_stack, Config as NetConfig, DhcpConfig, Runner, Stack, StackResources};
 use embassy_rp::gpio::{Level, Output};
-use embassy_time::{Duration, Instant, Timer};
+use embassy_time::{Instant, Timer};
 
 use embassy_rp::peripherals::{DMA_CH0, PIO0};
 use embassy_rp::pio::Pio;
 use rand_core::RngCore;
 
+use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use static_cell::StaticCell;
+use surfboard_lib::data::{tide_data, DataRetrievalAction};
 
 use crate::random::RngWrapper;
-use crate::system::event::{Events, send_event};
+use crate::system::event::{send_event, Events};
+use crate::system::net::HttpClientProvider;
 use crate::system::resources::{Irqs, WifiResources};
+
+pub static DATA_REQUEST_CHANNEL: Channel<CriticalSectionRawMutex, DataRetrievalAction, 4> = Channel::new();
+
+/// Requests a display update with the specified action
+pub async fn retrieve_data(display_action: DataRetrievalAction) {
+    DATA_REQUEST_CHANNEL.send(display_action).await;
+}
+
+/// Blocks until next update request, returns the requested display action
+async fn wait() -> DataRetrievalAction {
+    DATA_REQUEST_CHANNEL.receive().await
+}
 
 #[embassy_executor::task]
 async fn wifi_task(runner: cyw43::Runner<'static, Output<'static>, PioSpi<'static, PIO0, 0, DMA_CH0>>) -> ! {
@@ -28,7 +43,7 @@ async fn net_task(runner: &'static mut Runner<'static, cyw43::NetDriver<'static>
 }
 
 #[embassy_executor::task]
-pub async fn start(r: WifiResources, spawner: Spawner) {
+pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
     debug!("Initializing wifi");
 
     // Configure PIO and CYW43
@@ -69,17 +84,19 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
     let net_config = NetConfig::dhcpv4(dhcp_config);
 
     static STACK: StaticCell<Stack<'static>> = StaticCell::new();
+
     static RUNNER: StaticCell<Runner<'static, cyw43::NetDriver<'static>>> = StaticCell::new();
 
     // Increase this if you start getting socket ring errors.
-    static RESOURCES: StaticCell<StackResources<5>> = StaticCell::new();
+    static RESOURCES: StaticCell<StackResources<15>> = StaticCell::new();
     let (s, r) = new_stack(
         net_device,
         net_config,
-        RESOURCES.init(StackResources::<5>::new()),
+        RESOURCES.init(StackResources::<15>::new()),
         rand.next_u64(),
     );
     let stack = &*STACK.init(s);
+
     let runner = &mut *RUNNER.init(r);
     let mac_addr = stack.hardware_address();
     debug!("Hardware configured. MAC Address is {}", mac_addr);
@@ -117,4 +134,20 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
         }
     }
     debug!("Wifi setup!");
+
+    // handle network actions
+    let http_provider = HttpClientProvider::new(*stack);
+    let mut rx_buffer = [0; 8192];
+    loop {
+        let data_retrieval_action = wait().await;
+        match data_retrieval_action {
+            DataRetrievalAction::TideChart => {
+                debug!("Fetching tide data");
+                let data = tide_data(&http_provider, &mut rx_buffer)
+                    .await
+                    .expect("Failed to fetch tide data");
+                // send_event(Events::TideChartDataRetrieved(data)).await;
+            }
+        }
+    }
 }

@@ -1,10 +1,10 @@
-use defmt::{error, info};
+use defmt::{debug, error};
 use heapless::String;
-use surfboard_lib::draw::DisplayAction;
+use surfboard_lib::{data::DataRetrievalAction, draw::DisplayAction};
 
 use crate::{
-    system::event::{send_event, wait, Events},
-    task::display::display_update,
+    system::event::{wait, Events},
+    task::{display::display_update, wifi::retrieve_data},
 };
 use core::fmt::Write;
 
@@ -20,15 +20,19 @@ pub async fn start() {
 async fn process_event(event: Events) {
     match event {
         Events::WifiConnected(addr) => {
-            let mut txt: String<20> = String::new();
-            let _ = write!(txt, "IP: {}", addr);
+            let mut txt: String<30> = String::new();
+            let _ = write!(txt, "IP Address: {}", addr);
             display_update(DisplayAction::ShowStatusText(txt)).await;
+            // retrieve_data(DataRetrievalAction::TideChart).await;
         }
         Events::WifiDhcpError => {
             error!("Event: WifiDhcpError");
-            let mut txt: String<20> = String::new();
+            let mut txt: String<30> = String::new();
             let _ = write!(txt, "DHCP error");
             display_update(DisplayAction::ShowStatusText(txt)).await;
-        }
+        } // Events::TideChartDataRetrieved(tide_predictions) => {
+          //     debug!("Received tide predictions!");
+          //     display_update(DisplayAction::DisplaySurfReport(tide_predictions)).await;
+          // }
     }
 }

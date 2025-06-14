@@ -10,7 +10,9 @@ heapless = { version = "0.8.0", features = ["serde"] }
 serde-json-core = "0.6.0"
 serde = { version = "1.0", default-features = false }
 trait-variant = "0.1.2"
-lexical = "7.0.4"
+lexical = { version = "7.0.4", default-features = false, features = [
+    "parse-floats",
+] }
 
 
 [dev-dependencies]

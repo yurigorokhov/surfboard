@@ -3,6 +3,11 @@ use heapless::{String, Vec};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone)]
+pub enum DataRetrievalAction {
+    TideChart,
+}
+
 #[trait_variant::make(HttpService: Send)]
 pub trait HttpDataProvider {
     async fn get_as_json<'a, DataType: DeserializeOwned>(
@@ -15,22 +20,23 @@ pub trait HttpDataProvider {
 /****** Tide predictions ******/
 pub const TIDE_PREDICTIONS_LEN: usize = 32;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct TidePredictionsDataPoint {
     pub t: String<16>,
     pub v: String<8>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct TidePredictions {
     pub predictions: Vec<TidePredictionsDataPoint, TIDE_PREDICTIONS_LEN>,
 }
 
 pub async fn tide_data<'a, T: HttpDataProvider>(client: &'a T, buffer: &'a mut [u8]) -> Option<TidePredictions> {
     let url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=20250613&range=30&station=9413450&product=predictions&datum=STND&time_zone=lst&interval=h&units=english&format=json";
-    let data = client.get_as_json::<TidePredictions>(url, buffer).await;
-    data
+    client.get_as_json::<TidePredictions>(url, buffer).await
 }
+
+//TODO: fetch time: https://github.com/1-rafael-1/pi-pico-alarmclock-rust/blob/main/src/task/time_updater.rs#L290
 
 #[cfg(test)]
 mod tests {

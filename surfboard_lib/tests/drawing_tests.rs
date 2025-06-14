@@ -3,8 +3,8 @@ use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 use epd_waveshare::color::TriColor;
 use std::fs;
 use surfboard_lib::{
+    data::TidePredictions,
     draw::{draw_loading_screen, draw_tide},
-    http::TidePredictions,
 };
 
 #[test]

@@ -8,8 +8,8 @@ use embassy_rp::{
     peripherals::SPI0,
     spi::{self, Blocking},
 };
-use embassy_sync::blocking_mutex::Mutex;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
+use embassy_sync::blocking_mutex::Mutex;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use embassy_time::Delay;
 use embedded_graphics::prelude::*;
@@ -161,7 +161,8 @@ fn init_display(
         &mut Delay,
         None,
     )
-    .unwrap();
+    .expect("Display failed to initialize");
+    debug!("display initialized");
     WaveshareScreen {
         epd,
         spi_device,

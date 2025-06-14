@@ -14,7 +14,7 @@ use system::resources::*;
 
 mod task;
 use embassy_executor::Executor;
-use embassy_rp::multicore::{Stack, spawn_core1};
+use embassy_rp::multicore::{spawn_core1, Stack};
 use task::display;
 use task::orchestrate;
 use task::wifi;

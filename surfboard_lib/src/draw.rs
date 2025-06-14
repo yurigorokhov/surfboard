@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::http::{TidePredictions, TIDE_PREDICTIONS_LEN};
+use crate::data::{TidePredictions, TIDE_PREDICTIONS_LEN};
 use core::fmt::Write;
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
@@ -20,7 +20,8 @@ const TIDE_CHART_Y_BOTTOM: u32 = 400;
 const TIDE_Y_HEIGHT: u32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
 
 pub enum DisplayAction {
-    ShowStatusText(String<20>),
+    ShowStatusText(String<30>),
+    DisplaySurfReport(TidePredictions),
     Clear,
 }
 
@@ -47,6 +48,10 @@ impl DisplayAction {
             }
             DisplayAction::Clear => {
                 target.clear(epd_waveshare::color::TriColor::White).unwrap();
+                Ok(())
+            }
+            DisplayAction::DisplaySurfReport(tide_predictions) => {
+                draw_tide(target, &tide_predictions)?;
                 Ok(())
             }
         }
@@ -115,7 +120,7 @@ where
             continue;
         }
         let height = (heights[idx] + negative_adjustment - min_height) / max_height * TIDE_Y_HEIGHT as f32;
-        let screen_height = TIDE_CHART_Y_TOP + TIDE_Y_HEIGHT - f32::round(height) as u32;
+        let screen_height = TIDE_CHART_Y_TOP + TIDE_Y_HEIGHT - height as u32;
 
         points.push(Point::new(x_axis as i32, screen_height as i32)).unwrap();
 
