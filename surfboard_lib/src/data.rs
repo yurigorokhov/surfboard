@@ -8,6 +8,16 @@ pub enum DataRetrievalAction {
     TideChart,
 }
 
+pub struct ProgramState {
+    pub tide_predictions: Option<TidePredictions>,
+}
+
+impl ProgramState {
+    pub fn set_tide_predictions(&mut self, predictions: TidePredictions) {
+        self.tide_predictions = Some(predictions);
+    }
+}
+
 #[trait_variant::make(HttpService: Send)]
 pub trait HttpDataProvider {
     async fn get_as_json<'a, DataType: DeserializeOwned>(
@@ -20,13 +30,13 @@ pub trait HttpDataProvider {
 /****** Tide predictions ******/
 pub const TIDE_PREDICTIONS_LEN: usize = 32;
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct TidePredictionsDataPoint {
     pub t: String<16>,
     pub v: String<8>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct TidePredictions {
     pub predictions: Vec<TidePredictionsDataPoint, TIDE_PREDICTIONS_LEN>,
 }

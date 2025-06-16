@@ -5,6 +5,7 @@ use defmt::*;
 use embassy_executor::Spawner;
 use embassy_net::{new as new_stack, Config as NetConfig, DhcpConfig, Runner, Stack, StackResources};
 use embassy_rp::gpio::{Level, Output};
+use embassy_sync::mutex::Mutex;
 use embassy_time::{Instant, Timer};
 
 use embassy_rp::peripherals::{DMA_CH0, PIO0};
@@ -19,6 +20,7 @@ use crate::random::RngWrapper;
 use crate::system::event::{send_event, Events};
 use crate::system::net::HttpClientProvider;
 use crate::system::resources::{Irqs, WifiResources};
+use crate::task::state::STATE_MANAGER_MUTEX;
 
 pub static DATA_REQUEST_CHANNEL: Channel<CriticalSectionRawMutex, DataRetrievalAction, 4> = Channel::new();
 
@@ -114,8 +116,8 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
     let start = Instant::now().as_millis();
     loop {
         let elapsed = Instant::now().as_millis() - start;
-        if elapsed > 15_000 {
-            core::panic!("Couldn't get network up after 15 seconds");
+        if elapsed > 30_000 {
+            core::panic!("Couldn't get network up after 30 seconds");
         } else if stack.is_config_up() {
             info!("Network stack config completed after about {} ms", elapsed);
             break;
@@ -137,16 +139,23 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
 
     // handle network actions
     let http_provider = HttpClientProvider::new(*stack);
-    let mut rx_buffer = [0; 8192];
     loop {
         let data_retrieval_action = wait().await;
         match data_retrieval_action {
             DataRetrievalAction::TideChart => {
                 debug!("Fetching tide data");
-                let data = tide_data(&http_provider, &mut rx_buffer)
-                    .await
-                    .expect("Failed to fetch tide data");
-                // send_event(Events::TideChartDataRetrieved(data)).await;
+                {
+                    let mut buffer = [0u8; 0];
+                    let data = tide_data(&http_provider, &mut buffer)
+                        .await
+                        .expect("Failed to fetch tide data");
+                    {
+                        let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
+                        state_guard.set_tide_predictions(data);
+                    }
+                    send_event(Events::TideChartDataRetrieved).await;
+                }
+                debug!("Done fetching tide data");
             }
         }
     }

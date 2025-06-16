@@ -27,7 +27,6 @@
 use core::net::Ipv4Addr;
 
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
-use surfboard_lib::data::TidePredictions;
 
 /// Multi-producer, single-consumer event channel
 ///
@@ -35,7 +34,7 @@ use surfboard_lib::data::TidePredictions;
 /// - Memory usage
 /// - Event processing latency
 /// - System responsiveness
-pub static EVENT_CHANNEL: Channel<CriticalSectionRawMutex, Events, 10> = Channel::new();
+pub static EVENT_CHANNEL: Channel<CriticalSectionRawMutex, Events, 5> = Channel::new();
 
 /// Sends an event to the system channel
 ///
@@ -58,5 +57,5 @@ pub async fn wait() -> Events {
 pub enum Events {
     WifiConnected(Ipv4Addr),
     WifiDhcpError,
-    // TideChartDataRetrieved(TidePredictions),
+    TideChartDataRetrieved,
 }

@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::data::{TidePredictions, TIDE_PREDICTIONS_LEN};
+use crate::data::{ProgramState, TidePredictions, TIDE_PREDICTIONS_LEN};
 use core::fmt::Write;
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
@@ -21,12 +21,12 @@ const TIDE_Y_HEIGHT: u32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
 
 pub enum DisplayAction {
     ShowStatusText(String<30>),
-    DisplaySurfReport(TidePredictions),
+    DisplaySurfReport,
     Clear,
 }
 
 impl DisplayAction {
-    pub fn draw<D, E>(self, target: &mut D) -> Result<(), E>
+    pub fn draw<D, E>(self, target: &mut D, state: &ProgramState) -> Result<(), E>
     where
         E: Debug,
         D: DrawTarget<Color = TriColor, Error = E>,
@@ -50,8 +50,13 @@ impl DisplayAction {
                 target.clear(epd_waveshare::color::TriColor::White).unwrap();
                 Ok(())
             }
-            DisplayAction::DisplaySurfReport(tide_predictions) => {
-                draw_tide(target, &tide_predictions)?;
+            DisplayAction::DisplaySurfReport => {
+                match &state.tide_predictions {
+                    Some(predictions) => {
+                        draw_tide(target, &predictions)?;
+                    }
+                    None => todo!(),
+                }
                 Ok(())
             }
         }
@@ -135,7 +140,7 @@ where
             text_style,
         )
         .draw(target)?;
-        let mut txt: String<20> = String::new();
+        let mut txt: String<8> = String::new();
         write!(txt, "{:.1}ft", heights[idx]).unwrap();
         Text::with_text_style(
             txt.as_str(),

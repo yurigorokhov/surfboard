@@ -1,6 +1,9 @@
 use core::cell::RefCell;
 
-use crate::system::resources::ScreenResources;
+use crate::{
+    system::resources::ScreenResources,
+    task::state::{self, STATE_MANAGER_MUTEX},
+};
 use defmt::*;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDeviceWithConfig;
 use embassy_rp::{
@@ -110,6 +113,7 @@ where
 pub async fn start(r: ScreenResources) {
     debug!("Initializing display");
     let mut display = init_display(r);
+    display.sleep().expect("Failed to put screen to sleep");
 
     // clear display
     let mut canvas = Display7in5::default();
@@ -117,9 +121,15 @@ pub async fn start(r: ScreenResources) {
 
     loop {
         // Wait for the next display update request and clear the display
-        display.wake_up().expect("Failed to wake up");
         let display_action = wait().await;
-        display_action.draw(&mut canvas).expect("Failed to draw splash screen");
+        display.wake_up().expect("Failed to wake up");
+
+        {
+            let state_guard = STATE_MANAGER_MUTEX.lock().await;
+            display_action
+                .draw(&mut canvas, &*state_guard)
+                .expect("Failed to draw splash screen");
+        }
         display.draw(canvas.buffer()).expect("Failed to draw on screen");
         display.sleep().expect("Failed to put screen to sleep");
     }

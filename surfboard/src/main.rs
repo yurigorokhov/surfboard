@@ -7,7 +7,6 @@ use static_cell::StaticCell;
 use {defmt_rtt as _, panic_probe as _};
 
 mod random;
-use self::random::RngWrapper;
 
 mod system;
 use system::resources::*;
@@ -19,7 +18,7 @@ use task::display;
 use task::orchestrate;
 use task::wifi;
 
-static mut CORE1_STACK: Stack<4096> = Stack::new();
+static mut CORE1_STACK: Stack<8192> = Stack::new();
 static EXECUTOR0: StaticCell<Executor> = StaticCell::new();
 static EXECUTOR1: StaticCell<Executor> = StaticCell::new();
 

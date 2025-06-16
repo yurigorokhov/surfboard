@@ -26,14 +26,15 @@ impl HttpDataProvider for HttpClientProvider {
     async fn get_as_json<'a, DataType: DeserializeOwned>(
         &'a self,
         url: &'a str,
-        buffer: &'a mut [u8],
+        _buffer: &'a mut [u8],
     ) -> Option<DataType> {
         // let mut rng = RoscRng;
         // let seed = rng.next_u64();
         let seed: u64 = 1337;
 
-        let mut tls_read_buffer = [0; 16640];
-        let mut tls_write_buffer = [0; 16640];
+        let mut tls_read_buffer = [0; 4096];
+        let mut tls_write_buffer = [0; 4096];
+        let mut buffer = [0; 4096];
 
         let client_state = TcpClientState::<1, 1024, 1024>::new();
         let tcp_client = TcpClient::new(self.stack, &client_state);
@@ -51,7 +52,7 @@ impl HttpDataProvider for HttpClientProvider {
         }?;
 
         debug!("request created");
-        let response = match request.send(buffer).await {
+        let response = match request.send(&mut buffer).await {
             Ok(resp) => Some(resp),
             Err(e) => {
                 error!("Request error: {:?}", Debug2Format(&e));
@@ -59,6 +60,7 @@ impl HttpDataProvider for HttpClientProvider {
             }
         }?;
         debug!("response code: {}", response.status.0);
+
         let body = response
             .body()
             .read_to_end()
