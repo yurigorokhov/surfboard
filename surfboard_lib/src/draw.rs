@@ -1,6 +1,7 @@
 use core::fmt::Debug;
 
 use crate::data::{ProgramState, TidePredictions, TIDE_PREDICTIONS_LEN};
+use chrono::{Datelike, NaiveDateTime, Timelike};
 use core::fmt::Write;
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
@@ -57,39 +58,16 @@ impl DisplayAction {
                     }
                     None => todo!(),
                 }
+                match &state.last_updated {
+                    Some(dt) => {
+                        draw_last_updated(target, dt)?;
+                    }
+                    None => todo!(),
+                }
                 Ok(())
             }
         }
     }
-}
-
-pub fn draw_loading_screen<D, E>(target: &mut D) -> Result<(), E>
-where
-    E: Debug,
-    D: DrawTarget<Color = TriColor, Error = E>,
-{
-    // Create a new text style.
-    let text_style = TextStyleBuilder::new()
-        .alignment(Alignment::Left)
-        .line_height(LineHeight::Percent(150))
-        .build();
-
-    // Create a text at position (20, 30) and draw it using the previously defined style.
-    Text::with_text_style(
-        "Hello from embedded Rust!",
-        Point::new(20, 30),
-        MonoTextStyle::new(&FONT_10X20, TriColor::Black),
-        text_style,
-    )
-    .draw(target)?;
-    Text::with_text_style(
-        "- Yuri Gorokhov",
-        Point::new(20, 50),
-        MonoTextStyle::new(&FONT_10X20, TriColor::Chromatic),
-        text_style,
-    )
-    .draw(target)?;
-    Ok(())
 }
 
 pub fn draw_tide<D, E>(target: &mut D, tide_predictions: &TidePredictions) -> Result<(), E>
@@ -163,5 +141,34 @@ where
     Polyline::new(&points)
         .into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 3))
         .draw(target)?;
+    Ok(())
+}
+
+pub fn draw_last_updated<D, E>(target: &mut D, last_updated: &NaiveDateTime) -> Result<(), E>
+where
+    E: Debug,
+    D: DrawTarget<Color = TriColor, Error = E>,
+{
+    let text_style = TextStyleBuilder::new()
+        .alignment(Alignment::Left)
+        .line_height(LineHeight::Percent(100))
+        .build();
+    let mut txt: String<20> = String::new();
+    write!(
+        txt,
+        "Updated: {}/{} {}:{}",
+        last_updated.month(),
+        last_updated.day(),
+        last_updated.hour(),
+        last_updated.minute()
+    )
+    .expect("Failed to write");
+    Text::with_text_style(
+        txt.as_str(),
+        Point::new(700, 470),
+        MonoTextStyle::new(&FONT_5X8, TriColor::Black),
+        text_style,
+    )
+    .draw(target)?;
     Ok(())
 }

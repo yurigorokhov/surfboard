@@ -1,22 +1,12 @@
+use chrono::NaiveDate;
 use embedded_graphics::prelude::Size;
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 use epd_waveshare::color::TriColor;
 use std::fs;
 use surfboard_lib::{
     data::TidePredictions,
-    draw::{draw_loading_screen, draw_tide},
+    draw::{draw_last_updated, draw_tide},
 };
-
-#[test]
-fn test_loading_screen() {
-    let mut display = SimulatorDisplay::<TriColor>::new(Size::new(800, 480));
-    draw_loading_screen(&mut display).expect("Failed to draw loading screen");
-    let output_settings = OutputSettingsBuilder::new().scale(1).build();
-    let output_image = display.to_grayscale_output_image(&output_settings);
-    output_image
-        .save_png("tests/screenshots/loading_screen.png")
-        .expect("Failed to save test image");
-}
 
 #[tokio::test]
 async fn test_drawing_tide() {
@@ -31,5 +21,21 @@ async fn test_drawing_tide() {
     let output_image = display.to_grayscale_output_image(&output_settings);
     output_image
         .save_png("tests/screenshots/tide_predictions.png")
+        .expect("Failed to save test image");
+}
+
+#[tokio::test]
+async fn test_draw_last_updated() {
+    let dt = NaiveDate::from_ymd_opt(2025, 01, 01)
+        .unwrap()
+        .and_hms_milli_opt(9, 10, 11, 12)
+        .unwrap();
+
+    let mut display = SimulatorDisplay::<TriColor>::new(Size::new(800, 480));
+    draw_last_updated(&mut display, &dt).expect("Failed to draw loading screen");
+    let output_settings = OutputSettingsBuilder::new().scale(1).build();
+    let output_image = display.to_grayscale_output_image(&output_settings);
+    output_image
+        .save_png("tests/screenshots/last_updated.png")
         .expect("Failed to save test image");
 }

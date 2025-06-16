@@ -4,7 +4,6 @@ use embassy_net::{
     tcp::client::{TcpClient, TcpClientState},
     Stack,
 };
-use embassy_rp::clocks::RoscRng;
 use reqwless::{
     client::{HttpClient, TlsConfig, TlsVerify},
     request::Method,
@@ -23,13 +22,7 @@ impl HttpClientProvider {
 }
 
 impl HttpDataProvider for HttpClientProvider {
-    async fn get_as_json<'a, DataType: DeserializeOwned>(
-        &'a self,
-        url: &'a str,
-        _buffer: &'a mut [u8],
-    ) -> Option<DataType> {
-        // let mut rng = RoscRng;
-        // let seed = rng.next_u64();
+    async fn get_as_json<'a, DataType: DeserializeOwned>(&'a self, url: &'a str) -> Option<DataType> {
         let seed: u64 = 1337;
 
         let mut tls_read_buffer = [0; 4096];

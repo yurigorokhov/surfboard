@@ -5,7 +5,6 @@ use defmt::*;
 use embassy_executor::Spawner;
 use embassy_net::{new as new_stack, Config as NetConfig, DhcpConfig, Runner, Stack, StackResources};
 use embassy_rp::gpio::{Level, Output};
-use embassy_sync::mutex::Mutex;
 use embassy_time::{Instant, Timer};
 
 use embassy_rp::peripherals::{DMA_CH0, PIO0};
@@ -14,6 +13,7 @@ use rand_core::RngCore;
 
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use static_cell::StaticCell;
+use surfboard_lib::chrono::NaiveDate;
 use surfboard_lib::data::{tide_data, DataRetrievalAction};
 
 use crate::random::RngWrapper;
@@ -145,13 +145,15 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
             DataRetrievalAction::TideChart => {
                 debug!("Fetching tide data");
                 {
-                    let mut buffer = [0u8; 0];
-                    let data = tide_data(&http_provider, &mut buffer)
-                        .await
-                        .expect("Failed to fetch tide data");
+                    let data = tide_data(&http_provider).await.expect("Failed to fetch tide data");
                     {
                         let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
                         state_guard.set_tide_predictions(data);
+                        let dt = NaiveDate::from_ymd_opt(2025, 01, 01)
+                            .unwrap()
+                            .and_hms_milli_opt(9, 10, 11, 12)
+                            .unwrap();
+                        state_guard.set_last_updated(dt);
                     }
                     send_event(Events::TideChartDataRetrieved).await;
                 }

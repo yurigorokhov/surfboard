@@ -1,9 +1,6 @@
 use core::cell::RefCell;
 
-use crate::{
-    system::resources::ScreenResources,
-    task::state::{self, STATE_MANAGER_MUTEX},
-};
+use crate::{system::resources::ScreenResources, task::state::STATE_MANAGER_MUTEX};
 use defmt::*;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDeviceWithConfig;
 use embassy_rp::{

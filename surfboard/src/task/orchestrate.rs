@@ -19,7 +19,7 @@ pub async fn start() {
 
 async fn process_event(event: Events) {
     match event {
-        Events::WifiConnected(addr) => {
+        Events::WifiConnected(_addr) => {
             retrieve_data(DataRetrievalAction::TideChart).await;
         }
         Events::WifiDhcpError => {
