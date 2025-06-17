@@ -156,7 +156,7 @@ where
     let mut txt: String<20> = String::new();
     write!(
         txt,
-        "Updated: {}/{} {}:{}",
+        "Updated: {}/{} {:02}:{:02}",
         last_updated.month(),
         last_updated.day(),
         last_updated.hour(),
@@ -165,7 +165,7 @@ where
     .expect("Failed to write");
     Text::with_text_style(
         txt.as_str(),
-        Point::new(700, 470),
+        Point::new(680, 470),
         MonoTextStyle::new(&FONT_5X8, TriColor::Black),
         text_style,
     )

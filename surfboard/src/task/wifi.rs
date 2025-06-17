@@ -13,8 +13,7 @@ use rand_core::RngCore;
 
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use static_cell::StaticCell;
-use surfboard_lib::chrono::NaiveDate;
-use surfboard_lib::data::{tide_data, DataRetrievalAction};
+use surfboard_lib::data::{surf_report, DataRetrievalAction};
 
 use crate::random::RngWrapper;
 use crate::system::event::{send_event, Events};
@@ -142,18 +141,13 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
     loop {
         let data_retrieval_action = wait().await;
         match data_retrieval_action {
-            DataRetrievalAction::TideChart => {
-                debug!("Fetching tide data");
+            DataRetrievalAction::SurfReport => {
+                debug!("Fetching surf report");
                 {
-                    let data = tide_data(&http_provider).await.expect("Failed to fetch tide data");
+                    let data = surf_report(&http_provider).await.expect("Failed to fetch surf report");
                     {
                         let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-                        state_guard.set_tide_predictions(data);
-                        let dt = NaiveDate::from_ymd_opt(2025, 01, 01)
-                            .unwrap()
-                            .and_hms_milli_opt(9, 10, 11, 12)
-                            .unwrap();
-                        state_guard.set_last_updated(dt);
+                        state_guard.update_from_surf_report(data);
                     }
                     send_event(Events::TideChartDataRetrieved).await;
                 }

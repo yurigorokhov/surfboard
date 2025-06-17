@@ -20,7 +20,7 @@ pub async fn start() {
 async fn process_event(event: Events) {
     match event {
         Events::WifiConnected(_addr) => {
-            retrieve_data(DataRetrievalAction::TideChart).await;
+            retrieve_data(DataRetrievalAction::SurfReport).await;
         }
         Events::WifiDhcpError => {
             error!("Event: WifiDhcpError");

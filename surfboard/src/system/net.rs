@@ -59,6 +59,7 @@ impl HttpDataProvider for HttpClientProvider {
             .read_to_end()
             .await
             .expect("Failed to get response body");
+
         let (data, _remainder) = serde_json_core::from_slice::<DataType>(body).unwrap();
         Some(data)
     }
