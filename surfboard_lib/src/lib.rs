@@ -1,4 +1,6 @@
-#![no_std]
+#![cfg_attr(not(test), no_std)]
 
-// pub mod http;
+pub use chrono;
+pub mod data;
 pub mod draw;
+pub mod errors;

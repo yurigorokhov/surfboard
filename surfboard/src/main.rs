@@ -7,19 +7,18 @@ use static_cell::StaticCell;
 use {defmt_rtt as _, panic_probe as _};
 
 mod random;
-use self::random::RngWrapper;
 
 mod system;
 use system::resources::*;
 
 mod task;
 use embassy_executor::Executor;
-use embassy_rp::multicore::{Stack, spawn_core1};
+use embassy_rp::multicore::{spawn_core1, Stack};
 use task::display;
 use task::orchestrate;
 use task::wifi;
 
-static mut CORE1_STACK: Stack<4096> = Stack::new();
+static mut CORE1_STACK: Stack<8192> = Stack::new();
 static EXECUTOR0: StaticCell<Executor> = StaticCell::new();
 static EXECUTOR1: StaticCell<Executor> = StaticCell::new();
 
