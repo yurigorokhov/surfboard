@@ -13,4 +13,5 @@ clean:
 	cd surfboard_lib && cargo clean; cd -
 
 test:
+	cd surfboard_scraper && cargo test; cd -
 	cd surfboard_lib && cargo test; cd -
