@@ -147,7 +147,7 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
                     let data = surf_report(&http_provider).await.expect("Failed to fetch surf report");
                     {
                         let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-                        state_guard.update_from_surf_report(data);
+                        state_guard.update_surf_report(data);
                     }
                     send_event(Events::TideChartDataRetrieved).await;
                 }

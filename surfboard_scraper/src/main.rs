@@ -17,3 +17,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dbg!(&surf_report);
     Ok(())
 }
+
+//TODO: WEATHER curl https://services.surfline.com/kbyg/spots/forecasts/weather\?spotId\=5842041f4e65fad6a7708906\&days\=1\&intervalHours\=1
+//TODO: WIND curl https://services.surfline.com/kbyg/spots/forecasts/wind\?spotId\=5842041f4e65fad6a7708906\&days\=1\&intervalHours\=1

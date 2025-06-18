@@ -1,30 +1,9 @@
-use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone, Utc};
-// use chrono_tz::Tz;
 use heapless::{String, Vec};
 
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
-use crate::errors::SurfboardLibError;
-
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct SurfReportResponse {
-    timestamp: String<20>,
-    timezone: String<20>,
-    tide_predictions: TidePredictions,
-}
-
-impl SurfReportResponse {
-    fn parse_timestamp_utc(&self) -> Result<DateTime<Utc>, SurfboardLibError> {
-        Ok(self.timestamp.parse::<DateTime<Utc>>()?)
-    }
-
-    fn parse_timestamp_local(&self) -> Result<NaiveDateTime, SurfboardLibError> {
-        let offset = FixedOffset::west_opt(-7 * 3600).unwrap();
-        let local_time = self.parse_timestamp_utc()?.naive_local();
-        Ok(offset.from_local_datetime(&local_time).unwrap().naive_utc())
-    }
-}
+use crate::surf_report::SurfReportResponse;
 
 #[derive(Debug, Clone)]
 pub enum DataRetrievalAction {
@@ -33,23 +12,12 @@ pub enum DataRetrievalAction {
 
 #[derive(Default)]
 pub struct ProgramState {
-    pub tide_predictions: Option<TidePredictions>,
-    pub last_updated: Option<NaiveDateTime>,
+    pub surf_report: Option<SurfReportResponse>,
 }
 
 impl ProgramState {
-    pub fn set_tide_predictions(&mut self, predictions: TidePredictions) {
-        self.tide_predictions = Some(predictions);
-    }
-
-    pub fn set_last_updated(&mut self, last_updated: NaiveDateTime) {
-        self.last_updated = Some(last_updated);
-    }
-
-    pub fn update_from_surf_report(&mut self, surf_report: SurfReportResponse) -> Result<(), SurfboardLibError> {
-        self.set_last_updated(surf_report.parse_timestamp_local()?);
-        self.set_tide_predictions(surf_report.tide_predictions);
-        Ok(())
+    pub fn update_surf_report(&mut self, surf_report: SurfReportResponse) {
+        self.surf_report = Some(surf_report);
     }
 }
 
@@ -59,7 +27,7 @@ pub trait HttpDataProvider {
 }
 
 /****** Tide predictions ******/
-pub const TIDE_PREDICTIONS_LEN: usize = 32;
+pub const TIDE_PREDICTIONS_LEN: usize = 36;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct TidePredictionsDataPoint {
@@ -73,7 +41,7 @@ pub struct TidePredictions {
 }
 
 pub async fn surf_report<'a, T: HttpDataProvider>(client: &'a T) -> Option<SurfReportResponse> {
-    let fake_response = "{\"timestamp\":\"2025-06-17T03:37:26Z\",\"timezone\":\"US/Pacific\",\"tide_predictions\":{\"predictions\":[{\"t\":\"2025-06-13 00:00\",\"v\":\"5.009\"},{\"t\":\"2025-06-13 01:00\",\"v\":\"4.048\"},{\"t\":\"2025-06-13 02:00\",\"v\":\"2.804\"},{\"t\":\"2025-06-13 03:00\",\"v\":\"1.475\"},{\"t\":\"2025-06-13 04:00\",\"v\":\"0.286\"},{\"t\":\"2025-06-13 05:00\",\"v\":\"-0.554\"},{\"t\":\"2025-06-13 06:00\",\"v\":\"-0.905\"},{\"t\":\"2025-06-13 07:00\",\"v\":\"-0.729\"},{\"t\":\"2025-06-13 08:00\",\"v\":\"-0.101\"},{\"t\":\"2025-06-13 09:00\",\"v\":\"0.810\"},{\"t\":\"2025-06-13 10:00\",\"v\":\"1.790\"},{\"t\":\"2025-06-13 11:00\",\"v\":\"2.643\"},{\"t\":\"2025-06-13 12:00\",\"v\":\"3.232\"},{\"t\":\"2025-06-13 13:00\",\"v\":\"3.510\"},{\"t\":\"2025-06-13 14:00\",\"v\":\"3.516\"},{\"t\":\"2025-06-13 15:00\",\"v\":\"3.357\"},{\"t\":\"2025-06-13 16:00\",\"v\":\"3.174\"},{\"t\":\"2025-06-13 17:00\",\"v\":\"3.110\"},{\"t\":\"2025-06-13 18:00\",\"v\":\"3.264\"},{\"t\":\"2025-06-13 19:00\",\"v\":\"3.662\"},{\"t\":\"2025-06-13 20:00\",\"v\":\"4.242\"},{\"t\":\"2025-06-13 21:00\",\"v\":\"4.863\"},{\"t\":\"2025-06-13 22:00\",\"v\":\"5.346\"},{\"t\":\"2025-06-13 23:00\",\"v\":\"5.524\"},{\"t\":\"2025-06-14 00:00\",\"v\":\"5.287\"},{\"t\":\"2025-06-14 01:00\",\"v\":\"4.614\"},{\"t\":\"2025-06-14 02:00\",\"v\":\"3.573\"},{\"t\":\"2025-06-14 03:00\",\"v\":\"2.314\"},{\"t\":\"2025-06-14 04:00\",\"v\":\"1.043\"},{\"t\":\"2025-06-14 05:00\",\"v\":\"-0.022\"},{\"t\":\"2025-06-14 06:00\",\"v\":\"-0.692\"}]}}";
+    let fake_response = "{\"last_updated_utc\":1750217245,\"wave_data\":[{\"timestamp\":1750143600,\"surf\":{\"min\":3,\"max\":4,\"plus\":true,\"humanRelation\":\"Waist to shoulder\"}},{\"timestamp\":1750147200,\"surf\":{\"min\":3,\"max\":4,\"plus\":true,\"humanRelation\":\"Waist to shoulder\"}},{\"timestamp\":1750150800,\"surf\":{\"min\":3,\"max\":4,\"plus\":false,\"humanRelation\":\"Waist to chest\"}},{\"timestamp\":1750154400,\"surf\":{\"min\":3,\"max\":4,\"plus\":false,\"humanRelation\":\"Waist to chest\"}},{\"timestamp\":1750158000,\"surf\":{\"min\":3,\"max\":4,\"plus\":false,\"humanRelation\":\"Waist to chest\"}},{\"timestamp\":1750161600,\"surf\":{\"min\":3,\"max\":4,\"plus\":false,\"humanRelation\":\"Waist to chest\"}},{\"timestamp\":1750165200,\"surf\":{\"min\":3,\"max\":4,\"plus\":false,\"humanRelation\":\"Waist to chest\"}},{\"timestamp\":1750168800,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750172400,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750176000,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750179600,\"surf\":{\"min\":2,\"max\":3,\"plus\":false,\"humanRelation\":\"Thigh to waist\"}},{\"timestamp\":1750183200,\"surf\":{\"min\":2,\"max\":3,\"plus\":false,\"humanRelation\":\"Thigh to waist\"}},{\"timestamp\":1750186800,\"surf\":{\"min\":2,\"max\":3,\"plus\":false,\"humanRelation\":\"Thigh to waist\"}},{\"timestamp\":1750190400,\"surf\":{\"min\":2,\"max\":3,\"plus\":false,\"humanRelation\":\"Thigh to waist\"}},{\"timestamp\":1750194000,\"surf\":{\"min\":2,\"max\":3,\"plus\":false,\"humanRelation\":\"Thigh to waist\"}},{\"timestamp\":1750197600,\"surf\":{\"min\":2,\"max\":3,\"plus\":false,\"humanRelation\":\"Thigh to waist\"}},{\"timestamp\":1750201200,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750204800,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750208400,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750212000,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750215600,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750219200,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750222800,\"surf\":{\"min\":2,\"max\":3,\"plus\":true,\"humanRelation\":\"Thigh to stomach\"}},{\"timestamp\":1750226400,\"surf\":{\"min\":2,\"max\":3,\"plus\":false,\"humanRelation\":\"Thigh to waist\"}}],\"tides\":[{\"height\":3.51,\"timestamp\":1750143600,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.88,\"timestamp\":1750147200,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":4.15,\"timestamp\":1750150800,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":4.2,\"timestamp\":1750153090,\"type\":\"HIGH\",\"utcOffset\":-7},{\"height\":4.18,\"timestamp\":1750154400,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.87,\"timestamp\":1750158000,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.19,\"timestamp\":1750161600,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.26,\"timestamp\":1750165200,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":1.25,\"timestamp\":1750168800,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":0.42,\"timestamp\":1750172400,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":-0.06,\"timestamp\":1750176000,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":-0.13,\"timestamp\":1750178096,\"type\":\"LOW\",\"utcOffset\":-7},{\"height\":-0.09,\"timestamp\":1750179600,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":0.35,\"timestamp\":1750183200,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":1.13,\"timestamp\":1750186800,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.09,\"timestamp\":1750190400,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.07,\"timestamp\":1750194000,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.9,\"timestamp\":1750197600,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":4.41,\"timestamp\":1750201200,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":4.53,\"timestamp\":1750203658,\"type\":\"HIGH\",\"utcOffset\":-7},{\"height\":4.5,\"timestamp\":1750204800,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":4.24,\"timestamp\":1750208400,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.76,\"timestamp\":1750212000,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.19,\"timestamp\":1750215600,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.71,\"timestamp\":1750219200,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.44,\"timestamp\":1750222800,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.4,\"timestamp\":1750225050,\"type\":\"LOW\",\"utcOffset\":-7},{\"height\":2.41,\"timestamp\":1750226400,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.61,\"timestamp\":1750230000,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.95,\"timestamp\":1750233600,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.33,\"timestamp\":1750237200,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.63,\"timestamp\":1750240800,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.71,\"timestamp\":1750243741,\"type\":\"HIGH\",\"utcOffset\":-7},{\"height\":3.71,\"timestamp\":1750244400,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":3.5,\"timestamp\":1750248000,\"type\":\"NORMAL\",\"utcOffset\":-7},{\"height\":2.97,\"timestamp\":1750251600,\"type\":\"NORMAL\",\"utcOffset\":-7}]}";
     let body = fake_response.as_bytes();
     // client.get_as_json::<TidePredictions>(url).await
     let (data, _remainder) = serde_json_core::from_slice::<SurfReportResponse>(body).unwrap();
@@ -81,30 +49,3 @@ pub async fn surf_report<'a, T: HttpDataProvider>(client: &'a T) -> Option<SurfR
 }
 
 //TODO: fetch time: https://github.com/1-rafael-1/pi-pico-alarmclock-rust/blob/main/src/task/time_updater.rs#L290
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use reqwest;
-
-    struct TestDataProvider {}
-
-    impl HttpDataProvider for TestDataProvider {
-        async fn get_as_json<'a, DataType: DeserializeOwned>(&'a self, url: &'a str) -> Option<DataType> {
-            let response_str = reqwest::get(url).await.ok()?.text().await.ok()?;
-            let response_bytes = response_str.as_bytes();
-            let mut buffer = [0u8; 4096];
-            buffer[0..response_bytes.len()].copy_from_slice(response_bytes);
-            let (data, _remainder) = serde_json_core::from_slice::<DataType>(&buffer[0..response_bytes.len()]).unwrap();
-            Some(data)
-        }
-    }
-
-    #[tokio::test]
-    async fn test_get_tide_data() {
-        let http_provider = TestDataProvider {};
-        let data = surf_report(&http_provider).await;
-        assert!(data.is_some());
-        assert!(data.unwrap().tide_predictions.predictions.len() > 0);
-    }
-}

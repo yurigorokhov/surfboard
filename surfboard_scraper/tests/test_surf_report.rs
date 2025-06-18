@@ -9,8 +9,10 @@ async fn test_surf_report() {
     let tides_result = fetch_tides(PLEASURE_POINT_SPOT_ID).await.expect("Failed to load tides");
     let wave_result = fetch_waves(PLEASURE_POINT_SPOT_ID).await.expect("Failed to load waves");
     let surf_report = SurfReport::new_from_results(wave_result, tides_result);
-    let data = serde_json::to_string(&surf_report).expect("Failed to serialize surf report");
+    let data = serde_json::to_string_pretty(&surf_report).expect("Failed to serialize surf report");
     fs::write("tests/data/surf_report.json", data)
         .await
         .expect("Unable to write file");
 }
+
+// https://services.surfline.com/kbyg/spots/forecasts/wave\?spotId\=5842041f4e65fad6a7708906\&days\=1\&intervalHours\=1
