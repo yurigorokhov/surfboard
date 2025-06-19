@@ -8,6 +8,9 @@ build:
 run:
 	cd surfboard && cargo run --profile ${CARGO_PROFILE}; cd -
 
+run-fake:
+	cd surfboard && cargo run -F fake_responses --profile ${CARGO_PROFILE}; cd -
+
 clean:
 	cd surfboard && cargo clean; cd -
 	cd surfboard_lib && cargo clean; cd -

@@ -21,8 +21,11 @@ impl HttpClientProvider {
     }
 }
 
-impl HttpDataProvider for HttpClientProvider {
-    async fn get_as_json<'a, DataType: DeserializeOwned>(&'a self, url: &'a str) -> Option<DataType> {
+impl<DataType> HttpDataProvider<DataType> for HttpClientProvider
+where
+    DataType: DeserializeOwned,
+{
+    async fn get_as_json<'a>(&'a self, url: &'a str) -> Option<DataType> {
         let seed: u64 = 1337;
 
         let mut tls_read_buffer = [0; 4096];

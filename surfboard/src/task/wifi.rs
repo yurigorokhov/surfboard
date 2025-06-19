@@ -15,6 +15,8 @@ use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channe
 use static_cell::StaticCell;
 use surfboard_lib::data::{surf_report, DataRetrievalAction};
 
+#[cfg(feature = "fake_responses")]
+use crate::fake::fake_http::FakeHttpClient;
 use crate::random::RngWrapper;
 use crate::system::event::{send_event, Events};
 use crate::system::net::HttpClientProvider;
@@ -137,13 +139,18 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
     debug!("Wifi setup!");
 
     // handle network actions
-    let http_provider = HttpClientProvider::new(*stack);
     loop {
         let data_retrieval_action = wait().await;
         match data_retrieval_action {
             DataRetrievalAction::SurfReport => {
                 debug!("Fetching surf report");
                 {
+                    #[cfg(feature = "fake_responses")]
+                    let http_provider = FakeHttpClient::default();
+
+                    #[cfg(not(feature = "fake_responses"))]
+                    let http_provider = HttpClientProvider::new(*stack);
+
                     let data = surf_report(&http_provider).await.expect("Failed to fetch surf report");
                     {
                         let mut state_guard = STATE_MANAGER_MUTEX.lock().await;

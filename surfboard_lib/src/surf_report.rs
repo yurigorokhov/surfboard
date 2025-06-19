@@ -47,6 +47,12 @@ pub enum TideType {
     LOW,
 }
 
+impl TideType {
+    pub fn is_high_low(&self) -> bool {
+        self == &TideType::HIGH || self == &TideType::LOW
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TideMeasurement {

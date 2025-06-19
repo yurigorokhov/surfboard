@@ -18,6 +18,9 @@ use task::display;
 use task::orchestrate;
 use task::wifi;
 
+#[cfg(feature = "fake_responses")]
+mod fake;
+
 static mut CORE1_STACK: Stack<8192> = Stack::new();
 static EXECUTOR0: StaticCell<Executor> = StaticCell::new();
 static EXECUTOR1: StaticCell<Executor> = StaticCell::new();
