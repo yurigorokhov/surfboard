@@ -1,6 +1,6 @@
 use core::fmt::Debug;
 
-use crate::data::{ProgramState, TIDE_PREDICTIONS_LEN};
+use crate::data::{ProgramState, TIDE_PREDICTIONS_LEN, WAVE_PREDICTIONS_LEN};
 use crate::surf_report::{SurfReportResponse, TideType};
 use chrono::{Datelike, FixedOffset, NaiveDateTime, TimeZone, Timelike, Utc};
 use core::fmt::Write;
@@ -55,7 +55,8 @@ impl DisplayAction {
             }
             DisplayAction::DisplaySurfReport => match &state.surf_report {
                 Some(surf_report) => {
-                    draw_surf_report(target, &surf_report)?;
+                    let (min_time, max_time) = draw_tides(target, &surf_report)?;
+                    draw_wave_height(target, &surf_report, min_time, max_time)?;
                     draw_last_updated(target, &surf_report.parse_timestamp_local().unwrap())?;
                     Ok(())
                 }
@@ -65,7 +66,7 @@ impl DisplayAction {
     }
 }
 
-pub fn draw_surf_report<D, E>(target: &mut D, surf_report: &SurfReportResponse) -> Result<(), E>
+pub fn draw_tides<D, E>(target: &mut D, surf_report: &SurfReportResponse) -> Result<(i64, i64), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
@@ -84,7 +85,6 @@ where
 
     let mut points: Vec<Point, TIDE_PREDICTIONS_LEN> = Vec::new();
 
-    // do not show first few hours of the night
     let mut idx: usize = 0;
     for pred in &surf_report.tides {
         // if next data point is low/high tide, skip drawing this one
@@ -100,6 +100,7 @@ where
         }
         idx += 1;
 
+        // let pixels_per_foot = (pred.height + negative_adjustment - min_height) / max_height * TIDE_Y_HEIGHT as f32;
         let height = (pred.height + negative_adjustment - min_height) / max_height * TIDE_Y_HEIGHT as f32;
         let screen_height = TIDE_CHART_Y_TOP + TIDE_Y_HEIGHT - height as i32;
 
@@ -159,6 +160,38 @@ where
     Polyline::new(&points)
         .into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 3))
         .draw(target)?;
+    Ok((min_time, max_time))
+}
+
+pub fn draw_wave_height<D, E>(
+    target: &mut D,
+    surf_report: &SurfReportResponse,
+    min_time: i64,
+    max_time: i64,
+) -> Result<(), E>
+where
+    E: Debug,
+    D: DrawTarget<Color = TriColor, Error = E>,
+{
+    // find max and min
+    let text_style = TextStyleBuilder::new()
+        .alignment(Alignment::Left)
+        .line_height(LineHeight::Percent(100))
+        .build();
+    for data in surf_report.wave_data.iter().step_by(3) {
+        let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
+        let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
+
+        let mut txt: String<8> = String::new();
+        write!(txt, "{}-{}ft", data.surf.min, data.surf.max,).unwrap();
+        Text::with_text_style(
+            txt.as_str(),
+            Point::new(x_axis - 10, 470),
+            MonoTextStyle::new(&FONT_6X10, TriColor::Black),
+            text_style,
+        )
+        .draw(target)?;
+    }
     Ok(())
 }
 

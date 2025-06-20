@@ -1,125 +1,8 @@
 {
-  "last_updated_utc": 1750371530,
+  "last_updated_utc": 1750435120,
   "wave_data": [
     {
-      "timestamp": 1750316400,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750320000,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750323600,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750327200,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750330800,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750334400,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750338000,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750341600,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750345200,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750348800,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750352400,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750356000,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750359600,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750363200,
+      "timestamp": 1750402800,
       "surf": {
         "min": 2,
         "max": 3,
@@ -128,7 +11,7 @@
       }
     },
     {
-      "timestamp": 1750366800,
+      "timestamp": 1750406400,
       "surf": {
         "min": 2,
         "max": 3,
@@ -137,7 +20,7 @@
       }
     },
     {
-      "timestamp": 1750370400,
+      "timestamp": 1750410000,
       "surf": {
         "min": 2,
         "max": 3,
@@ -146,7 +29,7 @@
       }
     },
     {
-      "timestamp": 1750374000,
+      "timestamp": 1750413600,
       "surf": {
         "min": 2,
         "max": 3,
@@ -155,232 +38,187 @@
       }
     },
     {
-      "timestamp": 1750377600,
+      "timestamp": 1750417200,
       "surf": {
         "min": 2,
         "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750420800,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750424400,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750428000,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750431600,
+      "surf": {
+        "min": 3,
+        "max": 4,
         "plus": false,
-        "humanRelation": "Thigh to waist"
+        "humanRelation": "Waist to chest"
       }
     },
     {
-      "timestamp": 1750381200,
+      "timestamp": 1750435200,
       "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750384800,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750388400,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750392000,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750395600,
-      "surf": {
-        "min": 2,
-        "max": 3,
+        "min": 3,
+        "max": 4,
         "plus": false,
-        "humanRelation": "Thigh to waist"
+        "humanRelation": "Waist to chest"
       }
     },
     {
-      "timestamp": 1750399200,
+      "timestamp": 1750438800,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750442400,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750446000,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750449600,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750453200,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750456800,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750460400,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750464000,
+      "surf": {
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
+      }
+    },
+    {
+      "timestamp": 1750467600,
       "surf": {
         "min": 2,
         "max": 3,
-        "plus": false,
-        "humanRelation": "Thigh to waist"
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750471200,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750474800,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750478400,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750482000,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1750485600,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
       }
     }
   ],
   "tides": [
-    {
-      "height": 1.69,
-      "timestamp": 1750316400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 1.89,
-      "timestamp": 1750320000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.27,
-      "timestamp": 1750323600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.72,
-      "timestamp": 1750327200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.1,
-      "timestamp": 1750330800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.3,
-      "timestamp": 1750334400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.31,
-      "timestamp": 1750335282,
-      "type": "HIGH",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.23,
-      "timestamp": 1750338000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.89,
-      "timestamp": 1750341600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.35,
-      "timestamp": 1750345200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 1.74,
-      "timestamp": 1750348800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 1.23,
-      "timestamp": 1750352400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 0.99,
-      "timestamp": 1750356000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 0.98,
-      "timestamp": 1750356818,
-      "type": "LOW",
-      "utcOffset": -7
-    },
-    {
-      "height": 1.12,
-      "timestamp": 1750359600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 1.67,
-      "timestamp": 1750363200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.51,
-      "timestamp": 1750366800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.47,
-      "timestamp": 1750370400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.35,
-      "timestamp": 1750374000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.99,
-      "timestamp": 1750377600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 5.22,
-      "timestamp": 1750381104,
-      "type": "HIGH",
-      "utcOffset": -7
-    },
-    {
-      "height": 5.22,
-      "timestamp": 1750381200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.99,
-      "timestamp": 1750384800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.34,
-      "timestamp": 1750388400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.41,
-      "timestamp": 1750392000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.39,
-      "timestamp": 1750395600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 1.54,
-      "timestamp": 1750399200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
     {
       "height": 1.01,
       "timestamp": 1750402800,
@@ -389,7 +227,7 @@
     },
     {
       "height": 0.85,
-      "timestamp": 1750405958,
+      "timestamp": 1750405957,
       "type": "LOW",
       "utcOffset": -7
     },
@@ -433,6 +271,168 @@
       "height": 3.15,
       "timestamp": 1750427411,
       "type": "HIGH",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.13,
+      "timestamp": 1750428000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.97,
+      "timestamp": 1750431600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.61,
+      "timestamp": 1750435200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.15,
+      "timestamp": 1750438800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 1.76,
+      "timestamp": 1750442400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 1.58,
+      "timestamp": 1750446000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 1.57,
+      "timestamp": 1750446443,
+      "type": "LOW",
+      "utcOffset": -7
+    },
+    {
+      "height": 1.75,
+      "timestamp": 1750449600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.33,
+      "timestamp": 1750453200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.18,
+      "timestamp": 1750456800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.11,
+      "timestamp": 1750460400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.94,
+      "timestamp": 1750464000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.47,
+      "timestamp": 1750467600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.58,
+      "timestamp": 1750469999,
+      "type": "HIGH",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.56,
+      "timestamp": 1750471200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.14,
+      "timestamp": 1750474800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.27,
+      "timestamp": 1750478400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.09,
+      "timestamp": 1750482000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 1.84,
+      "timestamp": 1750485600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.81,
+      "timestamp": 1750489200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.18,
+      "timestamp": 1750492800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.0,
+      "timestamp": 1750495855,
+      "type": "LOW",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.02,
+      "timestamp": 1750496400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.3,
+      "timestamp": 1750500000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.88,
+      "timestamp": 1750503600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 1.6,
+      "timestamp": 1750507200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.33,
+      "timestamp": 1750510800,
+      "type": "NORMAL",
       "utcOffset": -7
     }
   ]

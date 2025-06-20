@@ -27,7 +27,7 @@ impl SurfReportResponse {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WaveMeasurement {
-    pub timestamp: u32,
+    pub timestamp: i64,
     pub surf: WaveMeasurementSurf,
 }
 

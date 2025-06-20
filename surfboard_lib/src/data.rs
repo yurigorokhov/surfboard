@@ -28,6 +28,7 @@ pub trait HttpDataProvider<DataType: DeserializeOwned> {
 
 /****** Tide predictions ******/
 pub const TIDE_PREDICTIONS_LEN: usize = 36;
+pub const WAVE_PREDICTIONS_LEN: usize = 36;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct TidePredictionsDataPoint {
