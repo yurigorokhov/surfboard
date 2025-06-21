@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": 1750435120,
+  "last_updated_utc": 1750477066,
   "wave_data": [
     {
       "timestamp": 1750402800,
@@ -58,19 +58,19 @@
     {
       "timestamp": 1750424400,
       "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
       }
     },
     {
       "timestamp": 1750428000,
       "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
+        "min": 3,
+        "max": 4,
+        "plus": false,
+        "humanRelation": "Waist to chest"
       }
     },
     {
@@ -130,10 +130,10 @@
     {
       "timestamp": 1750453200,
       "surf": {
-        "min": 3,
-        "max": 4,
-        "plus": false,
-        "humanRelation": "Waist to chest"
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
       }
     },
     {
@@ -148,10 +148,10 @@
     {
       "timestamp": 1750460400,
       "surf": {
-        "min": 3,
-        "max": 4,
-        "plus": false,
-        "humanRelation": "Waist to chest"
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
       }
     },
     {
@@ -186,8 +186,8 @@
       "surf": {
         "min": 2,
         "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
+        "plus": false,
+        "humanRelation": "Thigh to waist"
       }
     },
     {
@@ -434,6 +434,44 @@
       "timestamp": 1750510800,
       "type": "NORMAL",
       "utcOffset": -7
+    }
+  ],
+  "weather": [
+    {
+      "timestamp": 1750402800,
+      "utcOffset": -7,
+      "condition": "NIGHT_CLEAR",
+      "temperature": 55.634
+    },
+    {
+      "timestamp": 1750417200,
+      "utcOffset": -7,
+      "condition": "NIGHT_CLEAR",
+      "temperature": 52.08796
+    },
+    {
+      "timestamp": 1750431600,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 55.99404
+    },
+    {
+      "timestamp": 1750446000,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 67.85604
+    },
+    {
+      "timestamp": 1750460400,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 66.65
+    },
+    {
+      "timestamp": 1750474800,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 56.894
     }
   ]
 }
