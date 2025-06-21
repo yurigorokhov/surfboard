@@ -14,7 +14,7 @@ const HOURLY_MEASUREMENT_COUNT: usize = 36;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SurfReport {
     pub last_updated_utc: i64,
-    pub wave_data: Vec<WaveMeasurement>,
+    pub waves: Vec<WaveMeasurement>,
     pub tides: Vec<TideMeasurement>,
     pub weather: Vec<WeatherMeasurement>,
     pub wind: Vec<WindMeasurement>,
@@ -30,7 +30,7 @@ impl SurfReport {
         let now = Utc::now();
         SurfReport {
             last_updated_utc: now.timestamp(),
-            wave_data: wave_result
+            waves: wave_result
                 .data
                 .wave
                 .into_iter()

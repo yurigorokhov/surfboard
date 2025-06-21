@@ -1,6 +1,6 @@
 {
-  "last_updated_utc": 1750477514,
-  "wave_data": [
+  "last_updated_utc": 1750478074,
+  "waves": [
     {
       "timestamp": 1750402800,
       "surf": {
@@ -157,10 +157,10 @@
     {
       "timestamp": 1750464000,
       "surf": {
-        "min": 3,
-        "max": 4,
-        "plus": false,
-        "humanRelation": "Waist to chest"
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
       }
     },
     {
@@ -186,8 +186,8 @@
       "surf": {
         "min": 2,
         "max": 3,
-        "plus": false,
-        "humanRelation": "Thigh to waist"
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
       }
     },
     {
@@ -204,8 +204,8 @@
       "surf": {
         "min": 2,
         "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
+        "plus": false,
+        "humanRelation": "Thigh to waist"
       }
     },
     {
@@ -213,8 +213,8 @@
       "surf": {
         "min": 2,
         "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
+        "plus": false,
+        "humanRelation": "Thigh to waist"
       }
     }
   ],
@@ -459,19 +459,19 @@
       "timestamp": 1750446000,
       "utcOffset": -7,
       "condition": "CLEAR",
-      "temperature": 67.85604
+      "temperature": 65.732
     },
     {
       "timestamp": 1750460400,
       "utcOffset": -7,
       "condition": "CLEAR",
-      "temperature": 66.65
+      "temperature": 68.27
     },
     {
       "timestamp": 1750474800,
       "utcOffset": -7,
       "condition": "CLEAR",
-      "temperature": 56.894
+      "temperature": 58.72996
     }
   ],
   "wind": [
@@ -555,93 +555,93 @@
     {
       "timestamp": 1750442400,
       "utcOffset": -7,
-      "direction": 312.7281,
-      "directionType": "Offshore",
-      "speed": 6.57585
+      "direction": 206.35893,
+      "directionType": "Onshore",
+      "speed": 5.50258
     },
     {
       "timestamp": 1750446000,
       "utcOffset": -7,
-      "direction": 314.7382,
-      "directionType": "Offshore",
-      "speed": 8.73954
+      "direction": 225.3607,
+      "directionType": "Cross-shore",
+      "speed": 4.31373
     },
     {
       "timestamp": 1750449600,
       "utcOffset": -7,
-      "direction": 323.49402,
+      "direction": 314.4549,
       "directionType": "Offshore",
-      "speed": 12.35896
+      "speed": 7.5046
     },
     {
       "timestamp": 1750453200,
       "utcOffset": -7,
-      "direction": 326.85635,
+      "direction": 326.94464,
       "directionType": "Offshore",
-      "speed": 14.08738
+      "speed": 13.1652
     },
     {
       "timestamp": 1750456800,
       "utcOffset": -7,
-      "direction": 327.20773,
+      "direction": 327.9657,
       "directionType": "Offshore",
-      "speed": 14.20667
+      "speed": 13.90895
     },
     {
       "timestamp": 1750460400,
       "utcOffset": -7,
-      "direction": 327.4032,
+      "direction": 330.90417,
       "directionType": "Offshore",
-      "speed": 14.3431
+      "speed": 14.61003
     },
     {
       "timestamp": 1750464000,
       "utcOffset": -7,
-      "direction": 330.43982,
+      "direction": 329.00375,
       "directionType": "Offshore",
-      "speed": 15.28936
+      "speed": 13.87438
     },
     {
       "timestamp": 1750467600,
       "utcOffset": -7,
-      "direction": 332.12506,
+      "direction": 329.51898,
       "directionType": "Offshore",
-      "speed": 14.56718
+      "speed": 13.87178
     },
     {
       "timestamp": 1750471200,
       "utcOffset": -7,
-      "direction": 332.42538,
+      "direction": 331.02597,
       "directionType": "Offshore",
-      "speed": 13.35531
+      "speed": 13.77664
     },
     {
       "timestamp": 1750474800,
       "utcOffset": -7,
-      "direction": 330.8929,
+      "direction": 333.3082,
       "directionType": "Offshore",
-      "speed": 11.72664
+      "speed": 12.2776
     },
     {
       "timestamp": 1750478400,
       "utcOffset": -7,
-      "direction": 330.18372,
+      "direction": 330.69357,
       "directionType": "Offshore",
-      "speed": 9.39304
+      "speed": 10.04938
     },
     {
       "timestamp": 1750482000,
       "utcOffset": -7,
-      "direction": 331.10275,
+      "direction": 328.3322,
       "directionType": "Offshore",
-      "speed": 7.20446
+      "speed": 8.48172
     },
     {
       "timestamp": 1750485600,
       "utcOffset": -7,
-      "direction": 330.3342,
+      "direction": 329.7076,
       "directionType": "Offshore",
-      "speed": 5.44546
+      "speed": 7.27167
     }
   ]
 }

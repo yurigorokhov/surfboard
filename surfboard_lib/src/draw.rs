@@ -178,7 +178,7 @@ where
         .alignment(Alignment::Left)
         .line_height(LineHeight::Percent(100))
         .build();
-    for data in surf_report.wave_data.iter().step_by(3) {
+    for data in surf_report.waves.iter().step_by(3) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
