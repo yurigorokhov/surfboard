@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 use crate::{
     tide::{TideMeasurement, TideResult},
     wave::{WaveMeasurement, WaveResult},
-    weather::{WeatherCondition, WeatherMeasurement, WeatherResult},
+    weather::{WeatherMeasurement, WeatherResult},
+    wind::{WindMeasurement, WindResult},
 };
 
 const HOURLY_MEASUREMENT_COUNT: usize = 36;
@@ -16,10 +17,16 @@ pub struct SurfReport {
     pub wave_data: Vec<WaveMeasurement>,
     pub tides: Vec<TideMeasurement>,
     pub weather: Vec<WeatherMeasurement>,
+    pub wind: Vec<WindMeasurement>,
 }
 
 impl SurfReport {
-    pub fn new_from_results(wave_result: WaveResult, tide_result: TideResult, weather_result: WeatherResult) -> Self {
+    pub fn new_from_results(
+        wave_result: WaveResult,
+        tide_result: TideResult,
+        weather_result: WeatherResult,
+        wind_result: WindResult,
+    ) -> Self {
         let now = Utc::now();
         SurfReport {
             last_updated_utc: now.timestamp(),
@@ -36,6 +43,7 @@ impl SurfReport {
                 .take(HOURLY_MEASUREMENT_COUNT)
                 .collect(),
             weather: weather_result.data.weather,
+            wind: wind_result.data.wind,
         }
     }
 }

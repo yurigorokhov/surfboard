@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": 1750477066,
+  "last_updated_utc": 1750477514,
   "wave_data": [
     {
       "timestamp": 1750402800,
@@ -472,6 +472,176 @@
       "utcOffset": -7,
       "condition": "CLEAR",
       "temperature": 56.894
+    }
+  ],
+  "wind": [
+    {
+      "timestamp": 1750402800,
+      "utcOffset": -7,
+      "direction": 266.07584,
+      "directionType": "Cross-shore",
+      "speed": 1.79597
+    },
+    {
+      "timestamp": 1750406400,
+      "utcOffset": -7,
+      "direction": 262.78595,
+      "directionType": "Cross-shore",
+      "speed": 2.02872
+    },
+    {
+      "timestamp": 1750410000,
+      "utcOffset": -7,
+      "direction": 296.65143,
+      "directionType": "Offshore",
+      "speed": 1.29089
+    },
+    {
+      "timestamp": 1750413600,
+      "utcOffset": -7,
+      "direction": 200.32552,
+      "directionType": "Onshore",
+      "speed": 1.55128
+    },
+    {
+      "timestamp": 1750417200,
+      "utcOffset": -7,
+      "direction": 151.08533,
+      "directionType": "Onshore",
+      "speed": 2.29929
+    },
+    {
+      "timestamp": 1750420800,
+      "utcOffset": -7,
+      "direction": 125.29406,
+      "directionType": "Onshore",
+      "speed": 0.9824
+    },
+    {
+      "timestamp": 1750424400,
+      "utcOffset": -7,
+      "direction": 238.56396,
+      "directionType": "Cross-shore",
+      "speed": 1.18239
+    },
+    {
+      "timestamp": 1750428000,
+      "utcOffset": -7,
+      "direction": 226.80566,
+      "directionType": "Cross-shore",
+      "speed": 0.05053
+    },
+    {
+      "timestamp": 1750431600,
+      "utcOffset": -7,
+      "direction": 303.53217,
+      "directionType": "Offshore",
+      "speed": 2.49169
+    },
+    {
+      "timestamp": 1750435200,
+      "utcOffset": -7,
+      "direction": 293.86237,
+      "directionType": "Offshore",
+      "speed": 3.5634
+    },
+    {
+      "timestamp": 1750438800,
+      "utcOffset": -7,
+      "direction": 294.93942,
+      "directionType": "Offshore",
+      "speed": 5.24827
+    },
+    {
+      "timestamp": 1750442400,
+      "utcOffset": -7,
+      "direction": 312.7281,
+      "directionType": "Offshore",
+      "speed": 6.57585
+    },
+    {
+      "timestamp": 1750446000,
+      "utcOffset": -7,
+      "direction": 314.7382,
+      "directionType": "Offshore",
+      "speed": 8.73954
+    },
+    {
+      "timestamp": 1750449600,
+      "utcOffset": -7,
+      "direction": 323.49402,
+      "directionType": "Offshore",
+      "speed": 12.35896
+    },
+    {
+      "timestamp": 1750453200,
+      "utcOffset": -7,
+      "direction": 326.85635,
+      "directionType": "Offshore",
+      "speed": 14.08738
+    },
+    {
+      "timestamp": 1750456800,
+      "utcOffset": -7,
+      "direction": 327.20773,
+      "directionType": "Offshore",
+      "speed": 14.20667
+    },
+    {
+      "timestamp": 1750460400,
+      "utcOffset": -7,
+      "direction": 327.4032,
+      "directionType": "Offshore",
+      "speed": 14.3431
+    },
+    {
+      "timestamp": 1750464000,
+      "utcOffset": -7,
+      "direction": 330.43982,
+      "directionType": "Offshore",
+      "speed": 15.28936
+    },
+    {
+      "timestamp": 1750467600,
+      "utcOffset": -7,
+      "direction": 332.12506,
+      "directionType": "Offshore",
+      "speed": 14.56718
+    },
+    {
+      "timestamp": 1750471200,
+      "utcOffset": -7,
+      "direction": 332.42538,
+      "directionType": "Offshore",
+      "speed": 13.35531
+    },
+    {
+      "timestamp": 1750474800,
+      "utcOffset": -7,
+      "direction": 330.8929,
+      "directionType": "Offshore",
+      "speed": 11.72664
+    },
+    {
+      "timestamp": 1750478400,
+      "utcOffset": -7,
+      "direction": 330.18372,
+      "directionType": "Offshore",
+      "speed": 9.39304
+    },
+    {
+      "timestamp": 1750482000,
+      "utcOffset": -7,
+      "direction": 331.10275,
+      "directionType": "Offshore",
+      "speed": 7.20446
+    },
+    {
+      "timestamp": 1750485600,
+      "utcOffset": -7,
+      "direction": 330.3342,
+      "directionType": "Offshore",
+      "speed": 5.44546
     }
   ]
 }

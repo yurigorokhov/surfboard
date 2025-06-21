@@ -1,6 +1,8 @@
 use tokio::fs;
 
-use surfboard_scraper::{surf_report::SurfReport, tide::fetch_tides, wave::fetch_waves, weather::fetch_weather};
+use surfboard_scraper::{
+    surf_report::SurfReport, tide::fetch_tides, wave::fetch_waves, weather::fetch_weather, wind::fetch_wind,
+};
 
 const PLEASURE_POINT_SPOT_ID: &str = "5842041f4e65fad6a7708807";
 
@@ -10,8 +12,9 @@ async fn test_surf_report() {
     let wave_result = fetch_waves(PLEASURE_POINT_SPOT_ID).await.expect("Failed to load waves");
     let weather_result = fetch_weather(PLEASURE_POINT_SPOT_ID)
         .await
-        .expect("Failed to load waves");
-    let surf_report = SurfReport::new_from_results(wave_result, tides_result, weather_result);
+        .expect("Failed to load weather");
+    let wind_result = fetch_wind(PLEASURE_POINT_SPOT_ID).await.expect("Failed to load wind");
+    let surf_report = SurfReport::new_from_results(wave_result, tides_result, weather_result, wind_result);
     let data = serde_json::to_string_pretty(&surf_report).expect("Failed to serialize surf report");
     fs::write("tests/data/surf_report.json", data)
         .await
