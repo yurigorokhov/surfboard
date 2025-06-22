@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::http::fetch;
+pub use surfboard_lib::surf_report::TideMeasurement;
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -27,22 +28,6 @@ pub struct TideResult {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Tides {
     pub tides: Vec<TideMeasurement>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum TideType {
-    NORMAL,
-    HIGH,
-    LOW,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TideMeasurement {
-    pub height: f32,
-    pub timestamp: u64,
-    pub r#type: TideType,
-    pub utc_offset: i32,
 }
 
 pub async fn fetch_tides(spot_id: &str) -> Result<TideResult, Box<dyn std::error::Error>> {

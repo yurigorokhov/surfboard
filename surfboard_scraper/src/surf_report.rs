@@ -3,6 +3,8 @@ use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    conditions::{ConditionsMeasurement, ConditionsResult},
+    spot_details::{SpotDetails, SpotDetailsResult},
     tide::{TideMeasurement, TideResult},
     wave::{WaveMeasurement, WaveResult},
     weather::{WeatherMeasurement, WeatherResult},
@@ -18,6 +20,8 @@ pub struct SurfReport {
     pub tides: Vec<TideMeasurement>,
     pub weather: Vec<WeatherMeasurement>,
     pub wind: Vec<WindMeasurement>,
+    pub conditions: ConditionsMeasurement,
+    pub spot_details: SpotDetails,
 }
 
 impl SurfReport {
@@ -26,6 +30,8 @@ impl SurfReport {
         tide_result: TideResult,
         weather_result: WeatherResult,
         wind_result: WindResult,
+        conditions_result: ConditionsResult,
+        spot_details_result: SpotDetailsResult,
     ) -> Self {
         let now = Utc::now();
         SurfReport {
@@ -42,8 +48,20 @@ impl SurfReport {
                 .into_iter()
                 .take(HOURLY_MEASUREMENT_COUNT)
                 .collect(),
-            weather: weather_result.data.weather,
-            wind: wind_result.data.wind,
+            weather: weather_result
+                .data
+                .weather
+                .into_iter()
+                .take(HOURLY_MEASUREMENT_COUNT)
+                .collect(),
+            wind: wind_result
+                .data
+                .wind
+                .into_iter()
+                .take(HOURLY_MEASUREMENT_COUNT)
+                .collect(),
+            conditions: conditions_result.data.conditions.into_iter().next().unwrap(),
+            spot_details: spot_details_result.spot,
         }
     }
 }

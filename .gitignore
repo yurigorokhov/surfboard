@@ -1,3 +1,4 @@
 .cargo/config.toml
 .vscode/rp2040.svd
 target
+**/.ipynb_checkpoints

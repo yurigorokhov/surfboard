@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::errors::SurfboardLibError;
 
 const MEASUREMENTS_TIDE: usize = 36;
-const MEASUREMENTS_WAVE: usize = 24;
-const MEASUREMENTS_WIND: usize = 24;
+const MEASUREMENTS_WAVE: usize = 36;
+const MEASUREMENTS_WIND: usize = 36;
+const MEASUREMENTS_WEATHER: usize = 36;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SurfReportResponse {
@@ -14,6 +15,9 @@ pub struct SurfReportResponse {
     pub waves: Vec<WaveMeasurement, MEASUREMENTS_WAVE>,
     pub tides: Vec<TideMeasurement, MEASUREMENTS_TIDE>,
     pub wind: Vec<WindMeasurement, MEASUREMENTS_WIND>,
+    pub weather: Vec<WeatherMeasurement, MEASUREMENTS_WEATHER>,
+    pub conditions: ConditionsMeasurement,
+    pub spot_details: SpotDetails,
 }
 
 impl SurfReportResponse {
@@ -65,7 +69,7 @@ pub struct TideMeasurement {
     pub utc_offset: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub enum WindDirectionType {
     Onshore,
     Offshore,
@@ -81,4 +85,36 @@ pub struct WindMeasurement {
     pub direction: f32,
     pub direction_type: WindDirectionType,
     pub speed: f32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum WeatherCondition {
+    NightMostlyCloudy,
+    NightClear,
+    MostlyCloudy,
+    MostlyClear,
+    Mist,
+    Clear,
+    NightMostlyClear,
+    BriefShowers,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WeatherMeasurement {
+    pub timestamp: u32,
+    pub utc_offset: i32,
+    pub condition: WeatherCondition,
+    pub temperature: f32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ConditionsMeasurement {
+    pub headline: String<256>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SpotDetails {
+    pub name: String<64>,
 }
