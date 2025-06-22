@@ -57,5 +57,6 @@ pub async fn wait() -> Events {
 pub enum Events {
     WifiConnected(Ipv4Addr),
     WifiDhcpError,
-    TideChartDataRetrieved,
+    SurfReportRetrieved,
+    OrchestratorTimeout,
 }

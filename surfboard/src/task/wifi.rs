@@ -156,7 +156,7 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
                         let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
                         state_guard.update_surf_report(data);
                     }
-                    send_event(Events::TideChartDataRetrieved).await;
+                    send_event(Events::SurfReportRetrieved).await;
                 }
                 debug!("Done fetching tide data");
             }

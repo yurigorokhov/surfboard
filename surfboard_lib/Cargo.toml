@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 embedded-graphics = { version = "0.8.1" }
-epd-waveshare = { version = "0.6.0", features = ["graphics"] }
+epd-waveshare = { version = "0.6.0" }
 heapless = { version = "0.8.0", features = ["serde"] }
 serde-json-core = "0.6.0"
 serde = { version = "1.0", default-features = false }
