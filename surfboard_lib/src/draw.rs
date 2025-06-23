@@ -1,7 +1,7 @@
 use core::fmt::Debug;
 
 use crate::data::{ProgramState, TIDE_PREDICTIONS_LEN};
-use crate::image_data::{MOSTLY_CLEAR, WEATHER_SUNNY};
+use crate::image_data::{MOSTLY_CLEAR, MOSTLY_CLOUDY, WEATHER_SUNNY};
 use crate::surf_report::WeatherCondition;
 use crate::surf_report::{SurfReportResponse, WindDirectionType};
 use chrono::{Datelike, FixedOffset, NaiveDateTime, TimeZone, Timelike, Utc};
@@ -187,7 +187,7 @@ where
         .alignment(Alignment::Left)
         .line_height(LineHeight::Percent(100))
         .build();
-    for data in surf_report.waves.iter().step_by(3).take(10) {
+    for data in surf_report.waves.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -220,7 +220,7 @@ where
         .alignment(Alignment::Left)
         .line_height(LineHeight::Percent(100))
         .build();
-    for data in surf_report.wind.iter().step_by(3).take(10) {
+    for data in surf_report.wind.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -291,7 +291,7 @@ where
         .alignment(Alignment::Left)
         .line_height(LineHeight::Percent(100))
         .build();
-    for data in surf_report.weather.iter().step_by(3).take(10) {
+    for data in surf_report.weather.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -311,8 +311,15 @@ where
                     target,
                 );
             }
+            WeatherCondition::NightMostlyCloudy | WeatherCondition::MostlyCloudy => {
+                draw_binary_image_on_tricolor(
+                    &ImageRaw::<BinaryColor>::new(MOSTLY_CLOUDY, 32),
+                    Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
+                    target,
+                );
+            }
             _ => {
-                let mut txt: String<16> = String::new();
+                let mut txt: String<24> = String::new();
                 write!(txt, "{:?}", data.condition).unwrap();
                 Text::with_text_style(
                     txt.as_str(),

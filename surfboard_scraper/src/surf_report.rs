@@ -11,7 +11,8 @@ use crate::{
     wind::{WindMeasurement, WindResult},
 };
 
-const HOURLY_MEASUREMENT_COUNT: usize = 36;
+const HOURLY_TIDE_MEASUREMENT_COUNT: usize = 36;
+const HOURLY_OTHER_MEASUREMENT_COUNT: usize = 10;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SurfReport {
@@ -40,25 +41,28 @@ impl SurfReport {
                 .data
                 .wave
                 .into_iter()
-                .take(HOURLY_MEASUREMENT_COUNT)
+                .step_by(3)
+                .take(HOURLY_OTHER_MEASUREMENT_COUNT)
                 .collect(),
             tides: tide_result
                 .data
                 .tides
                 .into_iter()
-                .take(HOURLY_MEASUREMENT_COUNT)
+                .take(HOURLY_TIDE_MEASUREMENT_COUNT)
                 .collect(),
             weather: weather_result
                 .data
                 .weather
                 .into_iter()
-                .take(HOURLY_MEASUREMENT_COUNT)
+                .step_by(3)
+                .take(HOURLY_OTHER_MEASUREMENT_COUNT)
                 .collect(),
             wind: wind_result
                 .data
                 .wind
                 .into_iter()
-                .take(HOURLY_MEASUREMENT_COUNT)
+                .step_by(3)
+                .take(HOURLY_OTHER_MEASUREMENT_COUNT)
                 .collect(),
             conditions: conditions_result.data.conditions.into_iter().next().unwrap(),
             spot_details: spot_details_result.spot,

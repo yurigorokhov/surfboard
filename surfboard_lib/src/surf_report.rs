@@ -5,9 +5,9 @@ use serde::{Deserialize, Serialize};
 use crate::errors::SurfboardLibError;
 
 const MEASUREMENTS_TIDE: usize = 36;
-const MEASUREMENTS_WAVE: usize = 36;
-const MEASUREMENTS_WIND: usize = 36;
-const MEASUREMENTS_WEATHER: usize = 36;
+const MEASUREMENTS_WAVE: usize = 10;
+const MEASUREMENTS_WIND: usize = 10;
+const MEASUREMENTS_WEATHER: usize = 10;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SurfReportResponse {
@@ -98,6 +98,7 @@ pub enum WeatherCondition {
     Clear,
     NightMostlyClear,
     BriefShowers,
+    NightBriefShowers,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
