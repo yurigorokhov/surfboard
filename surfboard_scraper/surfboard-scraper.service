@@ -1,0 +1,17 @@
+# /lib/systemd/system/
+# sudo systemctl start/enable surfboard-scraper.service
+
+[Unit]
+Description=Surfboard Surfline Scraper
+After=network-online.target
+
+[Service]
+ExecStart=/bin/bash /home/pi/surdboard_scraper/start.sh
+WorkingDirectory=/home/pi/surdboard_scraper/
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target

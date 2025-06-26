@@ -99,6 +99,7 @@ pub enum WeatherCondition {
     NightMostlyClear,
     BriefShowers,
     NightBriefShowers,
+    NightMist,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

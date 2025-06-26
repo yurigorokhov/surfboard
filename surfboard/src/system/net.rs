@@ -28,9 +28,9 @@ where
     async fn get_as_json<'a>(&'a self, url: &'a str) -> Option<DataType> {
         let seed: u64 = 1337;
 
-        let mut tls_read_buffer = [0; 4096];
-        let mut tls_write_buffer = [0; 4096];
-        let mut buffer = [0; 4096];
+        let mut tls_read_buffer = [0; 4096 * 3];
+        let mut tls_write_buffer = [0; 4096 * 3];
+        let mut buffer = [0; 4096 * 3];
 
         let client_state = TcpClientState::<1, 1024, 1024>::new();
         let tcp_client = TcpClient::new(self.stack, &client_state);

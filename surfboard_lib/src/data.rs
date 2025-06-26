@@ -42,6 +42,6 @@ pub struct TidePredictions {
 }
 
 pub async fn surf_report<'a, T: HttpDataProvider<SurfReportResponse>>(client: &'a T) -> Option<SurfReportResponse> {
-    let url = "todo";
+    let url = "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report.json";
     client.get_as_json(url).await
 }
