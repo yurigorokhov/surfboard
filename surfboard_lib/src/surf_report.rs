@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::errors::SurfboardLibError;
 
-const MEASUREMENTS_TIDE: usize = 36;
-const MEASUREMENTS_WAVE: usize = 10;
-const MEASUREMENTS_WIND: usize = 10;
-const MEASUREMENTS_WEATHER: usize = 10;
+pub const MEASUREMENTS_TIDE: usize = 36;
+pub const MEASUREMENTS_WAVE: usize = 10;
+pub const MEASUREMENTS_WIND: usize = 10;
+pub const MEASUREMENTS_WEATHER: usize = 10;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SurfReportResponse {
@@ -80,7 +80,7 @@ pub enum WindDirectionType {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WindMeasurement {
-    pub timestamp: u64,
+    pub timestamp: i64,
     pub utc_offset: i32,
     pub direction: f32,
     pub direction_type: WindDirectionType,
@@ -105,7 +105,7 @@ pub enum WeatherCondition {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WeatherMeasurement {
-    pub timestamp: u32,
+    pub timestamp: i64,
     pub utc_offset: i32,
     pub condition: WeatherCondition,
     pub temperature: f32,

@@ -1,6 +1,6 @@
 use defmt::{debug, error};
 use embassy_futures::select::select;
-use embassy_time::{Instant, Timer};
+use embassy_time::Timer;
 use heapless::String;
 use surfboard_lib::{data::DataRetrievalAction, draw::DisplayAction};
 

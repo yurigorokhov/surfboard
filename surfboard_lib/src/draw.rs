@@ -8,7 +8,7 @@ use chrono::{Datelike, FixedOffset, NaiveDateTime, TimeZone, Timelike, Utc};
 use core::fmt::Write;
 use embedded_graphics::image::GetPixel;
 use embedded_graphics::image::ImageRaw;
-use embedded_graphics::mono_font::ascii::FONT_6X10;
+use embedded_graphics::mono_font::ascii::{FONT_6X10, FONT_8X13, FONT_9X15_BOLD};
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
 use embedded_graphics::pixelcolor::BinaryColor;
@@ -20,8 +20,8 @@ use embedded_graphics::{
 };
 use epd_waveshare::color::TriColor;
 use heapless::{String, Vec};
-const TIDE_CHART_X_LEFT: i32 = 50;
-const TIDE_CHART_X_RIGHT: i32 = 780;
+const TIDE_CHART_X_LEFT: i32 = 20;
+const TIDE_CHART_X_RIGHT: i32 = 760;
 const TIDE_CHART_WIDTH: i32 = TIDE_CHART_X_RIGHT - TIDE_CHART_X_LEFT;
 const TIDE_CHART_Y_TOP: i32 = 100;
 const TIDE_CHART_Y_BOTTOM: i32 = 300;
@@ -74,6 +74,12 @@ impl DisplayAction {
     }
 }
 
+fn get_local_time_from_unix(unix_timestamp: i64, offset: i32) -> NaiveDateTime {
+    let time = Utc.timestamp_opt(unix_timestamp, 0).unwrap().naive_local();
+    let offset = FixedOffset::west_opt(offset * 3600).unwrap();
+    offset.from_local_datetime(&time).unwrap().naive_utc()
+}
+
 pub fn draw_tides<D, E>(target: &mut D, surf_report: &SurfReportResponse) -> Result<(i64, i64), E>
 where
     E: Debug,
@@ -94,6 +100,7 @@ where
     let mut points: Vec<Point, TIDE_PREDICTIONS_LEN> = Vec::new();
 
     let mut idx: usize = 0;
+    let mut skip_next_ts = false;
     for pred in &surf_report.tides {
         // if next data point is low/high tide, skip drawing this one
         if idx < surf_report.tides.len() - 1 && surf_report.tides[idx + 1].r#type.is_high_low() {
@@ -120,32 +127,39 @@ where
             .alignment(Alignment::Left)
             .line_height(LineHeight::Percent(100))
             .build();
-        let time = Utc.timestamp_opt(pred.timestamp, 0).unwrap().naive_local();
+        let local_time = get_local_time_from_unix(pred.timestamp, pred.utc_offset);
 
-        let offset = FixedOffset::west_opt(pred.utc_offset * 3600).unwrap();
-        let local_time = offset.from_local_datetime(&time).unwrap().naive_utc();
-
-        let mut time_label: String<8> = String::new();
-        if pred.r#type.is_high_low() {
-            // show minutes for high/low tide
-            write!(time_label, "{:.2}:{:2}", local_time.hour(), local_time.minute()).unwrap();
+        // show timestamp only if it is a low/high tide, or a weather event
+        if !skip_next_ts && local_time.hour() > 5 && (pred.r#type.is_high_low() || local_time.hour() % 3 == 0) {
+            let mut time_label: String<8> = String::new();
+            if pred.r#type.is_high_low() {
+                // show minutes for high/low tide
+                write!(time_label, "{:.2}:{:02}", local_time.hour(), local_time.minute()).unwrap();
+                skip_next_ts = true;
+            } else {
+                write!(time_label, "{:.2}", local_time.hour()).unwrap();
+            }
+            Text::with_text_style(
+                time_label.as_str(),
+                Point::new(x_axis - 5, TIDE_CHART_Y_BOTTOM + 50),
+                MonoTextStyle::new(
+                    if pred.r#type.is_high_low() {
+                        &FONT_9X15_BOLD
+                    } else {
+                        &FONT_8X13
+                    },
+                    if pred.r#type.is_high_low() {
+                        TriColor::Chromatic
+                    } else {
+                        TriColor::Black
+                    },
+                ),
+                text_style,
+            )
+            .draw(target)?;
         } else {
-            write!(time_label, "{:.2}", local_time.hour()).unwrap();
+            skip_next_ts = false;
         }
-        Text::with_text_style(
-            time_label.as_str(),
-            Point::new(x_axis - 5, TIDE_CHART_Y_BOTTOM + 50),
-            MonoTextStyle::new(
-                &FONT_5X8,
-                if pred.r#type.is_high_low() {
-                    TriColor::Chromatic
-                } else {
-                    TriColor::Black
-                },
-            ),
-            text_style,
-        )
-        .draw(target)?;
 
         if pred.r#type.is_high_low() {
             let mut txt: String<8> = String::new();
@@ -188,6 +202,10 @@ where
         .line_height(LineHeight::Percent(100))
         .build();
     for data in surf_report.waves.iter().take(10) {
+        let local_time = get_local_time_from_unix(data.timestamp, -7);
+        if local_time.hour() < 6 {
+            continue;
+        }
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -221,6 +239,11 @@ where
         .line_height(LineHeight::Percent(100))
         .build();
     for data in surf_report.wind.iter().take(10) {
+        let local_time = get_local_time_from_unix(data.timestamp, data.utc_offset);
+        if local_time.hour() < 6 {
+            continue;
+        }
+
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -292,6 +315,11 @@ where
         .line_height(LineHeight::Percent(100))
         .build();
     for data in surf_report.weather.iter().take(10) {
+        let local_time = get_local_time_from_unix(data.timestamp, data.utc_offset);
+        if local_time.hour() < 6 {
+            continue;
+        }
+
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -368,7 +396,7 @@ where
     Text::with_text_style(
         surf_report.conditions.headline.as_str(),
         Point::new(10, y + 20),
-        MonoTextStyle::new(&FONT_6X10, TriColor::Black),
+        MonoTextStyle::new(&FONT_8X13, TriColor::Black),
         text_style,
     )
     .draw(target)?;

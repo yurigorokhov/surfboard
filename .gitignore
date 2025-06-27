@@ -2,3 +2,4 @@
 .vscode/rp2040.svd
 target
 **/.ipynb_checkpoints
+**/surfboard_scraper.tar.gz

@@ -1,6 +1,7 @@
 use chrono::prelude::*;
 
 use serde::{Deserialize, Serialize};
+use surfboard_lib::surf_report::{MEASUREMENTS_TIDE, MEASUREMENTS_WAVE, MEASUREMENTS_WEATHER, MEASUREMENTS_WIND};
 
 use crate::{
     conditions::{ConditionsMeasurement, ConditionsResult},
@@ -10,9 +11,6 @@ use crate::{
     weather::{WeatherMeasurement, WeatherResult},
     wind::{WindMeasurement, WindResult},
 };
-
-const HOURLY_TIDE_MEASUREMENT_COUNT: usize = 36;
-const HOURLY_OTHER_MEASUREMENT_COUNT: usize = 10;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SurfReport {
@@ -41,28 +39,32 @@ impl SurfReport {
                 .data
                 .wave
                 .into_iter()
+                .skip(6)
                 .step_by(3)
-                .take(HOURLY_OTHER_MEASUREMENT_COUNT)
+                .take(MEASUREMENTS_WAVE)
                 .collect(),
             tides: tide_result
                 .data
                 .tides
                 .into_iter()
-                .take(HOURLY_TIDE_MEASUREMENT_COUNT)
+                .skip(6)
+                .take(MEASUREMENTS_TIDE)
                 .collect(),
             weather: weather_result
                 .data
                 .weather
                 .into_iter()
+                .skip(6)
                 .step_by(3)
-                .take(HOURLY_OTHER_MEASUREMENT_COUNT)
+                .take(MEASUREMENTS_WEATHER)
                 .collect(),
             wind: wind_result
                 .data
                 .wind
                 .into_iter()
+                .skip(6)
                 .step_by(3)
-                .take(HOURLY_OTHER_MEASUREMENT_COUNT)
+                .take(MEASUREMENTS_WIND)
                 .collect(),
             conditions: conditions_result.data.conditions.into_iter().next().unwrap(),
             spot_details: spot_details_result.spot,

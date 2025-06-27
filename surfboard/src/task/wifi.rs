@@ -140,7 +140,15 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
 
     // handle network actions
     loop {
+        control
+            .set_power_management(cyw43::PowerManagementMode::SuperSave)
+            .await;
+
         let data_retrieval_action = wait().await;
+
+        control
+            .set_power_management(cyw43::PowerManagementMode::Performance)
+            .await;
         match data_retrieval_action {
             DataRetrievalAction::SurfReport => {
                 debug!("Fetching surf report");

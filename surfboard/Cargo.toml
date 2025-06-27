@@ -129,3 +129,6 @@ debug-assertions = false
 incremental = false
 lto = 'fat'
 opt-level = 's'
+
+[dev-dependencies]
+elf2uf2-rs = "2.1.1"
