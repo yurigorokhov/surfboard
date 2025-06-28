@@ -1,78 +1,6 @@
 {
-  "last_updated_utc": 1750992445,
+  "last_updated_utc": 1751080099,
   "waves": [
-    {
-      "timestamp": 1750942800,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": false,
-        "humanRelation": "Thigh to waist"
-      }
-    },
-    {
-      "timestamp": 1750953600,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": false,
-        "humanRelation": "Thigh to waist"
-      }
-    },
-    {
-      "timestamp": 1750964400,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": false,
-        "humanRelation": "Thigh to waist"
-      }
-    },
-    {
-      "timestamp": 1750975200,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": false,
-        "humanRelation": "Thigh to waist"
-      }
-    },
-    {
-      "timestamp": 1750986000,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1750996800,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1751007600,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
-    {
-      "timestamp": 1751018400,
-      "surf": {
-        "min": 2,
-        "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
-      }
-    },
     {
       "timestamp": 1751029200,
       "surf": {
@@ -87,180 +15,84 @@
       "surf": {
         "min": 2,
         "max": 3,
+        "plus": false,
+        "humanRelation": "Thigh to waist"
+      }
+    },
+    {
+      "timestamp": 1751050800,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": false,
+        "humanRelation": "Thigh to waist"
+      }
+    },
+    {
+      "timestamp": 1751061600,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": false,
+        "humanRelation": "Thigh to waist"
+      }
+    },
+    {
+      "timestamp": 1751072400,
+      "surf": {
+        "min": 2,
+        "max": 3,
         "plus": true,
         "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1751083200,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1751094000,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1751104800,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": true,
+        "humanRelation": "Thigh to stomach"
+      }
+    },
+    {
+      "timestamp": 1751115600,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": false,
+        "humanRelation": "Thigh to waist"
+      }
+    },
+    {
+      "timestamp": 1751126400,
+      "surf": {
+        "min": 2,
+        "max": 3,
+        "plus": false,
+        "humanRelation": "Thigh to waist"
       }
     }
   ],
   "tides": [
-    {
-      "height": -1.74,
-      "timestamp": 1750942800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": -1.74,
-      "timestamp": 1750942806,
-      "type": "LOW",
-      "utcOffset": -7
-    },
-    {
-      "height": -1.43,
-      "timestamp": 1750946400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": -0.62,
-      "timestamp": 1750950000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 0.49,
-      "timestamp": 1750953600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 1.77,
-      "timestamp": 1750957200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.99,
-      "timestamp": 1750960800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.92,
-      "timestamp": 1750964400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.31,
-      "timestamp": 1750968000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.33,
-      "timestamp": 1750968561,
-      "type": "HIGH",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.19,
-      "timestamp": 1750971600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.81,
-      "timestamp": 1750975200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.35,
-      "timestamp": 1750978800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.03,
-      "timestamp": 1750982400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.95,
-      "timestamp": 1750985047,
-      "type": "LOW",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.96,
-      "timestamp": 1750986000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.29,
-      "timestamp": 1750989600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 3.94,
-      "timestamp": 1750993200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.74,
-      "timestamp": 1750996800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 5.49,
-      "timestamp": 1751000400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 5.96,
-      "timestamp": 1751004000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 6.0,
-      "timestamp": 1751005639,
-      "type": "HIGH",
-      "utcOffset": -7
-    },
-    {
-      "height": 5.93,
-      "timestamp": 1751007600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 5.29,
-      "timestamp": 1751011200,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 4.07,
-      "timestamp": 1751014800,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 2.46,
-      "timestamp": 1751018400,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": 0.8,
-      "timestamp": 1751022000,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
-    {
-      "height": -0.53,
-      "timestamp": 1751025600,
-      "type": "NORMAL",
-      "utcOffset": -7
-    },
     {
       "height": -1.31,
       "timestamp": 1751029200,
@@ -269,7 +101,7 @@
     },
     {
       "height": -1.48,
-      "timestamp": 1751031966,
+      "timestamp": 1751031967,
       "type": "LOW",
       "utcOffset": -7
     },
@@ -308,144 +140,312 @@
       "timestamp": 1751050800,
       "type": "NORMAL",
       "utcOffset": -7
+    },
+    {
+      "height": 4.15,
+      "timestamp": 1751054400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.4,
+      "timestamp": 1751057645,
+      "type": "HIGH",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.38,
+      "timestamp": 1751058000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.18,
+      "timestamp": 1751061600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.74,
+      "timestamp": 1751065200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.27,
+      "timestamp": 1751068800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.95,
+      "timestamp": 1751072400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.89,
+      "timestamp": 1751074820,
+      "type": "LOW",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.91,
+      "timestamp": 1751076000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.23,
+      "timestamp": 1751079600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.85,
+      "timestamp": 1751083200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.58,
+      "timestamp": 1751086800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.24,
+      "timestamp": 1751090400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.61,
+      "timestamp": 1751094000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.64,
+      "timestamp": 1751095004,
+      "type": "HIGH",
+      "utcOffset": -7
+    },
+    {
+      "height": 5.49,
+      "timestamp": 1751097600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 4.8,
+      "timestamp": 1751101200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 3.6,
+      "timestamp": 1751104800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.11,
+      "timestamp": 1751108400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.65,
+      "timestamp": 1751112000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": -0.46,
+      "timestamp": 1751115600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": -1.03,
+      "timestamp": 1751119200,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": -1.08,
+      "timestamp": 1751121042,
+      "type": "LOW",
+      "utcOffset": -7
+    },
+    {
+      "height": -1.03,
+      "timestamp": 1751122800,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": -0.49,
+      "timestamp": 1751126400,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 0.42,
+      "timestamp": 1751130000,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 1.55,
+      "timestamp": 1751133600,
+      "type": "NORMAL",
+      "utcOffset": -7
+    },
+    {
+      "height": 2.73,
+      "timestamp": 1751137200,
+      "type": "NORMAL",
+      "utcOffset": -7
     }
   ],
   "weather": [
     {
-      "timestamp": 1750942800,
-      "utcOffset": -7,
-      "condition": "MOSTLY_CLEAR",
-      "temperature": 51.98
-    },
-    {
-      "timestamp": 1750953600,
-      "utcOffset": -7,
-      "condition": "MOSTLY_CLEAR",
-      "temperature": 53.366
-    },
-    {
-      "timestamp": 1750964400,
-      "utcOffset": -7,
-      "condition": "CLEAR",
-      "temperature": 60.944
-    },
-    {
-      "timestamp": 1750975200,
-      "utcOffset": -7,
-      "condition": "CLEAR",
-      "temperature": 68.27
-    },
-    {
-      "timestamp": 1750986000,
-      "utcOffset": -7,
-      "condition": "CLEAR",
-      "temperature": 62.63596
-    },
-    {
-      "timestamp": 1750996800,
-      "utcOffset": -7,
-      "condition": "CLEAR",
-      "temperature": 54.644
-    },
-    {
-      "timestamp": 1751007600,
-      "utcOffset": -7,
-      "condition": "NIGHT_CLEAR",
-      "temperature": 51.206
-    },
-    {
-      "timestamp": 1751018400,
-      "utcOffset": -7,
-      "condition": "NIGHT_MOSTLY_CLOUDY",
-      "temperature": 49.262
-    },
-    {
       "timestamp": 1751029200,
       "utcOffset": -7,
-      "condition": "MOSTLY_CLOUDY",
-      "temperature": 48.34396
+      "condition": "MOSTLY_CLEAR",
+      "temperature": 53.15
     },
     {
       "timestamp": 1751040000,
       "utcOffset": -7,
-      "condition": "MOSTLY_CLOUDY",
-      "temperature": 49.94596
+      "condition": "MOSTLY_CLEAR",
+      "temperature": 56.156
+    },
+    {
+      "timestamp": 1751050800,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 63.15796
+    },
+    {
+      "timestamp": 1751061600,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 65.084
+    },
+    {
+      "timestamp": 1751072400,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 59.81
+    },
+    {
+      "timestamp": 1751083200,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 52.664
+    },
+    {
+      "timestamp": 1751094000,
+      "utcOffset": -7,
+      "condition": "NIGHT_CLEAR",
+      "temperature": 50.82796
+    },
+    {
+      "timestamp": 1751104800,
+      "utcOffset": -7,
+      "condition": "NIGHT_CLEAR",
+      "temperature": 49.568
+    },
+    {
+      "timestamp": 1751115600,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 48.74004
+    },
+    {
+      "timestamp": 1751126400,
+      "utcOffset": -7,
+      "condition": "CLEAR",
+      "temperature": 55.328
     }
   ],
   "wind": [
     {
-      "timestamp": 1750942800,
-      "utcOffset": -7,
-      "direction": 163.81383,
-      "directionType": "Onshore",
-      "speed": 2.47967
-    },
-    {
-      "timestamp": 1750953600,
-      "utcOffset": -7,
-      "direction": 158.02806,
-      "directionType": "Onshore",
-      "speed": 5.04799
-    },
-    {
-      "timestamp": 1750964400,
-      "utcOffset": -7,
-      "direction": 209.25267,
-      "directionType": "Onshore",
-      "speed": 4.4575
-    },
-    {
-      "timestamp": 1750975200,
-      "utcOffset": -7,
-      "direction": 174.58057,
-      "directionType": "Onshore",
-      "speed": 5.80746
-    },
-    {
-      "timestamp": 1750986000,
-      "utcOffset": -7,
-      "direction": 146.74088,
-      "directionType": "Onshore",
-      "speed": 6.37063
-    },
-    {
-      "timestamp": 1750996800,
-      "utcOffset": -7,
-      "direction": 141.99278,
-      "directionType": "Onshore",
-      "speed": 4.72394
-    },
-    {
-      "timestamp": 1751007600,
-      "utcOffset": -7,
-      "direction": 153.13133,
-      "directionType": "Onshore",
-      "speed": 2.61429
-    },
-    {
-      "timestamp": 1751018400,
-      "utcOffset": -7,
-      "direction": 165.76814,
-      "directionType": "Onshore",
-      "speed": 2.09926
-    },
-    {
       "timestamp": 1751029200,
       "utcOffset": -7,
-      "direction": 174.59506,
+      "direction": 195.00981,
       "directionType": "Onshore",
-      "speed": 0.62781
+      "speed": 1.93266
     },
     {
       "timestamp": 1751040000,
       "utcOffset": -7,
-      "direction": 176.62624,
+      "direction": 189.47308,
       "directionType": "Onshore",
-      "speed": 2.14435
+      "speed": 2.61763
+    },
+    {
+      "timestamp": 1751050800,
+      "utcOffset": -7,
+      "direction": 220.10246,
+      "directionType": "Onshore",
+      "speed": 5.39837
+    },
+    {
+      "timestamp": 1751061600,
+      "utcOffset": -7,
+      "direction": 195.8147,
+      "directionType": "Onshore",
+      "speed": 5.72313
+    },
+    {
+      "timestamp": 1751072400,
+      "utcOffset": -7,
+      "direction": 153.88522,
+      "directionType": "Onshore",
+      "speed": 6.36588
+    },
+    {
+      "timestamp": 1751083200,
+      "utcOffset": -7,
+      "direction": 133.66457,
+      "directionType": "Onshore",
+      "speed": 5.41866
+    },
+    {
+      "timestamp": 1751094000,
+      "utcOffset": -7,
+      "direction": 155.19867,
+      "directionType": "Onshore",
+      "speed": 2.25289
+    },
+    {
+      "timestamp": 1751104800,
+      "utcOffset": -7,
+      "direction": 145.52019,
+      "directionType": "Onshore",
+      "speed": 1.37469
+    },
+    {
+      "timestamp": 1751115600,
+      "utcOffset": -7,
+      "direction": 212.84933,
+      "directionType": "Onshore",
+      "speed": 0.3293
+    },
+    {
+      "timestamp": 1751126400,
+      "utcOffset": -7,
+      "direction": 223.9387,
+      "directionType": "Onshore",
+      "speed": 2.44026
     }
   ],
   "conditions": {
-    "headline": "A little more size running this AM, still modest, especially with the low tide. Clean in town."
+    "headline": "Fun waves coming through, a little softer now the tide is up. Conditions in town mostly clean."
   },
   "spot_details": {
     "name": "Pleasure Point"

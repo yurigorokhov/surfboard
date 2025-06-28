@@ -16,3 +16,8 @@ clean:
 
 test:
 	cargo test
+
+flash:
+	cargo build --release
+	picotool load -t elf target/thumbv6m-none-eabi/release/surfboard
+	picotool reboot

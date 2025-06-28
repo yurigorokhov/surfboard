@@ -119,6 +119,10 @@ pub async fn start(r: ScreenResources) {
     loop {
         // Wait for the next display update request and clear the display
         let display_action = wait().await;
+        if display_action == DisplayAction::DisplaySurfReport {
+            canvas.clear(epd_waveshare::color::TriColor::White).unwrap();
+        }
+
         display.wake_up().expect("Failed to wake up");
 
         {

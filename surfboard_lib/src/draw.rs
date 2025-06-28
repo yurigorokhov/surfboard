@@ -20,13 +20,14 @@ use embedded_graphics::{
 };
 use epd_waveshare::color::TriColor;
 use heapless::{String, Vec};
-const TIDE_CHART_X_LEFT: i32 = 20;
+const TIDE_CHART_X_LEFT: i32 = 50;
 const TIDE_CHART_X_RIGHT: i32 = 760;
 const TIDE_CHART_WIDTH: i32 = TIDE_CHART_X_RIGHT - TIDE_CHART_X_LEFT;
 const TIDE_CHART_Y_TOP: i32 = 100;
 const TIDE_CHART_Y_BOTTOM: i32 = 300;
 const TIDE_Y_HEIGHT: i32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
 
+#[derive(PartialEq)]
 pub enum DisplayAction {
     ShowStatusText(String<30>),
     DisplaySurfReport,
@@ -130,7 +131,7 @@ where
         let local_time = get_local_time_from_unix(pred.timestamp, pred.utc_offset);
 
         // show timestamp only if it is a low/high tide, or a weather event
-        if !skip_next_ts && local_time.hour() > 5 && (pred.r#type.is_high_low() || local_time.hour() % 3 == 0) {
+        if !skip_next_ts && (pred.r#type.is_high_low() || local_time.hour() % 3 == 0) {
             let mut time_label: String<8> = String::new();
             if pred.r#type.is_high_low() {
                 // show minutes for high/low tide
@@ -202,10 +203,6 @@ where
         .line_height(LineHeight::Percent(100))
         .build();
     for data in surf_report.waves.iter().take(10) {
-        let local_time = get_local_time_from_unix(data.timestamp, -7);
-        if local_time.hour() < 6 {
-            continue;
-        }
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -239,11 +236,6 @@ where
         .line_height(LineHeight::Percent(100))
         .build();
     for data in surf_report.wind.iter().take(10) {
-        let local_time = get_local_time_from_unix(data.timestamp, data.utc_offset);
-        if local_time.hour() < 6 {
-            continue;
-        }
-
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
@@ -315,11 +307,6 @@ where
         .line_height(LineHeight::Percent(100))
         .build();
     for data in surf_report.weather.iter().take(10) {
-        let local_time = get_local_time_from_unix(data.timestamp, data.utc_offset);
-        if local_time.hour() < 6 {
-            continue;
-        }
-
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
