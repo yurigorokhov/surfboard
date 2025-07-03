@@ -8,6 +8,7 @@ use crate::surf_report::SurfReportResponse;
 #[derive(Debug, Clone)]
 pub enum DataRetrievalAction {
     SurfReport,
+    PowerOffWifi,
 }
 
 #[derive(Default)]

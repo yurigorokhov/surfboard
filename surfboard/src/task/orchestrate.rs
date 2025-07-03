@@ -1,4 +1,4 @@
-use defmt::{debug, error};
+use defmt::{debug, error, info};
 use embassy_futures::select::select;
 use embassy_time::Timer;
 use heapless::String;
@@ -6,7 +6,7 @@ use surfboard_lib::{data::DataRetrievalAction, draw::DisplayAction};
 
 use crate::{
     system::event::{wait, Events},
-    task::{display::display_update, wifi::retrieve_data},
+    task::{display::display_update, power::POWER_DOWN_SIGNAL, wifi::retrieve_data},
 };
 use core::fmt::Write;
 
@@ -15,7 +15,7 @@ use core::fmt::Write;
 pub async fn start() {
     loop {
         let event_future = wait();
-        let timeout = Timer::after_secs(3600);
+        let timeout = Timer::after_secs(60);
         match select(event_future, timeout).await {
             embassy_futures::select::Either::First(event) => {
                 process_event(event).await;
@@ -27,12 +27,13 @@ pub async fn start() {
     }
 }
 
-async fn process_event(event: Events) {
+async fn process_event<'a>(event: Events) {
     match event {
         Events::OrchestratorTimeout => {
-            // update surf report on timeout
-            retrieve_data(DataRetrievalAction::SurfReport).await;
+            // tell wifi to power off
+            retrieve_data(DataRetrievalAction::PowerOffWifi).await;
         }
+        Events::WifiOff => POWER_DOWN_SIGNAL.signal(()),
         Events::WifiConnected(_addr) => {
             retrieve_data(DataRetrievalAction::SurfReport).await;
         }
@@ -45,6 +46,9 @@ async fn process_event(event: Events) {
         Events::SurfReportRetrieved => {
             debug!("Received tide predictions!");
             display_update(DisplayAction::DisplaySurfReport).await;
+        }
+        Events::PowerButtonPressed => {
+            info!("Power button pressed!");
         }
     }
 }

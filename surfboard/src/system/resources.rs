@@ -29,6 +29,11 @@ assign_resources! {
         dio: PIN_24,
         clk: PIN_29,
         dma: DMA_CH0,
+    },
+
+    sleep: SleepResources {
+        wake_pin: PIN_18,
+        status_led: PIN_19,
     }
 }
 

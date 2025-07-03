@@ -124,7 +124,6 @@ pub async fn start(r: ScreenResources) {
         }
 
         display.wake_up().expect("Failed to wake up");
-
         {
             let state_guard = STATE_MANAGER_MUTEX.lock().await;
             display_action

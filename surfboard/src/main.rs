@@ -16,6 +16,7 @@ use embassy_executor::Executor;
 use embassy_rp::multicore::{spawn_core1, Stack};
 use task::display;
 use task::orchestrate;
+use task::power;
 use task::wifi;
 
 #[cfg(feature = "fake_responses")]
@@ -45,5 +46,6 @@ fn main() -> ! {
     executor0.run(|spawner| {
         spawner.spawn(orchestrate::start()).unwrap();
         spawner.spawn(wifi::start(r.wifi, spawner)).unwrap();
+        spawner.spawn(power::start(r.sleep)).unwrap();
     });
 }

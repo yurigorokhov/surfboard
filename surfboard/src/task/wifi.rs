@@ -46,7 +46,7 @@ async fn net_task(runner: &'static mut Runner<'static, cyw43::NetDriver<'static>
 }
 
 #[embassy_executor::task]
-pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
+pub async fn start(r: WifiResources, spawner: Spawner) {
     debug!("Initializing wifi");
 
     // Configure PIO and CYW43
@@ -54,120 +54,131 @@ pub async fn start(r: WifiResources, spawner: Spawner) -> ! {
     let clm = include_bytes!("../../cyw43-firmware/43439A0_clm.bin");
     let pwr = Output::new(r.pwr, Level::Low);
     let cs = Output::new(r.cs, Level::High);
-    let mut pio = Pio::new(r.pio, Irqs);
-    let spi = PioSpi::new(
-        &mut pio.common,
-        pio.sm0,
-        DEFAULT_CLOCK_DIVIDER,
-        pio.irq0,
-        cs,
-        r.dio,
-        r.clk,
-        r.dma,
-    );
 
-    static STATE: StaticCell<cyw43::State> = StaticCell::new();
-    let state = STATE.init(cyw43::State::new());
-    let (net_device, mut control, runner) = cyw43::new(state, pwr, spi, fw).await;
-    unwrap!(spawner.spawn(wifi_task(runner)));
-    debug!("WiFi task started");
+    {
+        let mut pio = Pio::new(r.pio, Irqs);
+        let spi = PioSpi::new(
+            &mut pio.common,
+            pio.sm0,
+            DEFAULT_CLOCK_DIVIDER,
+            pio.irq0,
+            cs,
+            r.dio,
+            r.clk,
+            r.dma,
+        );
 
-    control.init(clm).await;
-    control
-        .set_power_management(cyw43::PowerManagementMode::Performance)
-        .await;
+        static STATE: StaticCell<cyw43::State> = StaticCell::new();
+        let state = STATE.init(cyw43::State::new());
 
-    let mut rand = RngWrapper::new();
-    let wifi_ssid = env!("WIFI_SSID");
-    let wifi_password = env!("WIFI_PASSWORD");
-    let client_name: &str = "surfboard";
+        let (net_device, mut control, runner) = cyw43::new(state, pwr, spi, fw).await;
+        unwrap!(spawner.spawn(wifi_task(runner)));
+        debug!("WiFi task started");
 
-    let mut dhcp_config = DhcpConfig::default();
-    dhcp_config.hostname = Some(heapless::String::from_str(client_name).unwrap());
-    let net_config = NetConfig::dhcpv4(dhcp_config);
-
-    static STACK: StaticCell<Stack<'static>> = StaticCell::new();
-
-    static RUNNER: StaticCell<Runner<'static, cyw43::NetDriver<'static>>> = StaticCell::new();
-
-    // Increase this if you start getting socket ring errors.
-    static RESOURCES: StaticCell<StackResources<15>> = StaticCell::new();
-    let (s, r) = new_stack(
-        net_device,
-        net_config,
-        RESOURCES.init(StackResources::<15>::new()),
-        rand.next_u64(),
-    );
-    let stack = &*STACK.init(s);
-
-    let runner = &mut *RUNNER.init(r);
-    let mac_addr = stack.hardware_address();
-    debug!("Hardware configured. MAC Address is {}", mac_addr);
-
-    // Start networking services thread
-    unwrap!(spawner.spawn(net_task(runner)));
-
-    // join Wifi
-    info!("Joining Wifi {}", wifi_ssid);
-    control
-        .join(wifi_ssid, JoinOptions::new(wifi_password.as_bytes()))
-        .await
-        .unwrap();
-
-    let start = Instant::now().as_millis();
-    loop {
-        let elapsed = Instant::now().as_millis() - start;
-        if elapsed > 30_000 {
-            core::panic!("Couldn't get network up after 30 seconds");
-        } else if stack.is_config_up() {
-            info!("Network stack config completed after about {} ms", elapsed);
-            break;
-        } else {
-            Timer::after_millis(10).await;
-        }
-    }
-
-    match stack.config_v4() {
-        Some(a) => {
-            info!("IP Address appears to be: {}", a.address);
-            send_event(Events::WifiConnected(a.address.address())).await;
-        }
-        None => {
-            send_event(Events::WifiDhcpError).await;
-        }
-    }
-    debug!("Wifi setup!");
-
-    // handle network actions
-    loop {
-        control
-            .set_power_management(cyw43::PowerManagementMode::SuperSave)
-            .await;
-
-        let data_retrieval_action = wait().await;
-
+        control.init(clm).await;
         control
             .set_power_management(cyw43::PowerManagementMode::Performance)
             .await;
-        match data_retrieval_action {
-            DataRetrievalAction::SurfReport => {
-                debug!("Fetching surf report");
-                {
-                    #[cfg(feature = "fake_responses")]
-                    let http_provider = FakeHttpClient::default();
 
-                    #[cfg(not(feature = "fake_responses"))]
-                    let http_provider = HttpClientProvider::new(*stack);
+        let mut rand = RngWrapper::new();
+        let wifi_ssid = env!("WIFI_SSID");
+        let wifi_password = env!("WIFI_PASSWORD");
+        let client_name: &str = "surfboard";
 
-                    let data = surf_report(&http_provider).await.expect("Failed to fetch surf report");
+        let mut dhcp_config = DhcpConfig::default();
+        dhcp_config.hostname = Some(heapless::String::from_str(client_name).unwrap());
+        let net_config = NetConfig::dhcpv4(dhcp_config);
+
+        static STACK: StaticCell<Stack<'static>> = StaticCell::new();
+
+        static RUNNER: StaticCell<Runner<'static, cyw43::NetDriver<'static>>> = StaticCell::new();
+
+        // Increase this if you start getting socket ring errors.
+        static RESOURCES: StaticCell<StackResources<15>> = StaticCell::new();
+        let (s, r) = new_stack(
+            net_device,
+            net_config,
+            RESOURCES.init(StackResources::<15>::new()),
+            rand.next_u64(),
+        );
+        let stack = &*STACK.init(s);
+
+        let runner = &mut *RUNNER.init(r);
+        let mac_addr = stack.hardware_address();
+        debug!("Hardware configured. MAC Address is {}", mac_addr);
+
+        // Start networking services thread
+        unwrap!(spawner.spawn(net_task(runner)));
+
+        // join Wifi
+        info!("Joining Wifi {}", wifi_ssid);
+        control
+            .join(wifi_ssid, JoinOptions::new(wifi_password.as_bytes()))
+            .await
+            .unwrap();
+
+        let start = Instant::now().as_millis();
+        loop {
+            let elapsed = Instant::now().as_millis() - start;
+            if elapsed > 30_000 {
+                core::panic!("Couldn't get network up after 30 seconds");
+            } else if stack.is_config_up() {
+                info!("Network stack config completed after about {} ms", elapsed);
+                break;
+            } else {
+                Timer::after_millis(10).await;
+            }
+        }
+
+        match stack.config_v4() {
+            Some(a) => {
+                info!("IP Address appears to be: {}", a.address);
+                send_event(Events::WifiConnected(a.address.address())).await;
+            }
+            None => {
+                send_event(Events::WifiDhcpError).await;
+            }
+        }
+        debug!("Wifi setup!");
+
+        // handle network actions
+        control.gpio_set(0, true).await;
+        loop {
+            control
+                .set_power_management(cyw43::PowerManagementMode::SuperSave)
+                .await;
+
+            let data_retrieval_action = wait().await;
+
+            match data_retrieval_action {
+                DataRetrievalAction::SurfReport => {
+                    control
+                        .set_power_management(cyw43::PowerManagementMode::Performance)
+                        .await;
+
+                    debug!("Fetching surf report");
                     {
-                        let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-                        state_guard.update_surf_report(data);
+                        #[cfg(feature = "fake_responses")]
+                        let http_provider = FakeHttpClient::default();
+
+                        #[cfg(not(feature = "fake_responses"))]
+                        let http_provider = HttpClientProvider::new(*stack);
+
+                        let data = surf_report(&http_provider).await.expect("Failed to fetch surf report");
+                        {
+                            let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
+                            state_guard.update_surf_report(data);
+                        }
+                        send_event(Events::SurfReportRetrieved).await;
                     }
-                    send_event(Events::SurfReportRetrieved).await;
+                    debug!("Done fetching tide data");
                 }
-                debug!("Done fetching tide data");
+                DataRetrievalAction::PowerOffWifi => {
+                    control.gpio_set(0, false).await;
+                    break;
+                }
             }
         }
     }
+    send_event(Events::WifiOff).await;
 }
