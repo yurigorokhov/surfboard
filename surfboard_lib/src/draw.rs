@@ -1,7 +1,7 @@
 use core::fmt::Debug;
 
 use crate::data::{ProgramState, TIDE_PREDICTIONS_LEN};
-use crate::image_data::{MOSTLY_CLEAR, MOSTLY_CLOUDY, WEATHER_SUNNY};
+use crate::image_data::{MIST, MOSTLY_CLEAR, MOSTLY_CLOUDY, SHOWERS, WEATHER_SUNNY};
 use crate::surf_report::WeatherCondition;
 use crate::surf_report::{SurfReportResponse, WindDirectionType};
 use chrono::{Datelike, FixedOffset, NaiveDateTime, TimeZone, Timelike, Utc};
@@ -329,6 +329,20 @@ where
             WeatherCondition::NightMostlyCloudy | WeatherCondition::MostlyCloudy => {
                 draw_binary_image_on_tricolor(
                     &ImageRaw::<BinaryColor>::new(MOSTLY_CLOUDY, 32),
+                    Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
+                    target,
+                );
+            }
+            WeatherCondition::Mist | WeatherCondition::NightMist => {
+                draw_binary_image_on_tricolor(
+                    &ImageRaw::<BinaryColor>::new(MIST, 32),
+                    Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
+                    target,
+                );
+            }
+            WeatherCondition::NightBriefShowers | WeatherCondition::BriefShowers => {
+                draw_binary_image_on_tricolor(
+                    &ImageRaw::<BinaryColor>::new(SHOWERS, 32),
                     Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
                     target,
                 );
