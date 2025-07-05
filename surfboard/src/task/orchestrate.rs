@@ -15,7 +15,7 @@ use core::fmt::Write;
 pub async fn start() {
     loop {
         let event_future = wait();
-        let timeout = Timer::after_secs(120);
+        let timeout = Timer::after_secs(60);
         match select(event_future, timeout).await {
             embassy_futures::select::Either::First(event) => {
                 process_event(event).await;
