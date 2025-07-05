@@ -8,7 +8,7 @@ use chrono::{Datelike, FixedOffset, NaiveDateTime, TimeZone, Timelike, Utc};
 use core::fmt::Write;
 use embedded_graphics::image::GetPixel;
 use embedded_graphics::image::ImageRaw;
-use embedded_graphics::mono_font::ascii::{FONT_6X10, FONT_8X13, FONT_9X15_BOLD};
+use embedded_graphics::mono_font::ascii::{FONT_6X10, FONT_7X13, FONT_8X13, FONT_9X15_BOLD};
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
 use embedded_graphics::pixelcolor::BinaryColor;
@@ -168,7 +168,7 @@ where
             Text::with_text_style(
                 txt.as_str(),
                 Point::new(x_axis - 5, screen_height - 20),
-                MonoTextStyle::new(&FONT_6X10, TriColor::Black),
+                MonoTextStyle::new(&FONT_7X13, TriColor::Black),
                 text_style,
             )
             .draw(target)?;
@@ -211,7 +211,7 @@ where
         Text::with_text_style(
             txt.as_str(),
             Point::new(x_axis - 10, y),
-            MonoTextStyle::new(&FONT_6X10, TriColor::Black),
+            MonoTextStyle::new(&FONT_7X13, TriColor::Black),
             text_style,
         )
         .draw(target)?;
@@ -244,7 +244,7 @@ where
         Text::with_text_style(
             txt.as_str(),
             Point::new(x_axis - 10, y),
-            MonoTextStyle::new(&FONT_6X10, TriColor::Black),
+            MonoTextStyle::new(&FONT_7X13, TriColor::Black),
             text_style,
         )
         .draw(target)?;

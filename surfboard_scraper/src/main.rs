@@ -8,8 +8,8 @@ mod weather;
 mod wind;
 
 use aws_config::meta::region::RegionProviderChain;
-use aws_sdk_s3::{Client, types::ObjectCannedAcl};
-use tokio::time::{Duration, sleep};
+use aws_sdk_s3::{types::ObjectCannedAcl, Client};
+use tokio::time::{sleep, Duration};
 
 use crate::{
     conditions::fetch_conditions, spot_details::fetch_spot_details, surf_report::SurfReport, tide::fetch_tides,
