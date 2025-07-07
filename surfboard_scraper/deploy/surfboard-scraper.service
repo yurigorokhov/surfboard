@@ -3,12 +3,12 @@ Description=Surfboard Surfline Scraper
 After=network-online.target
 
 [Service]
-ExecStart=/home/pi/surfboard_scraper/surfboard_scraper
-WorkingDirectory=/home/pi/surfboard_scraper/
+ExecStart=/opt/surfboard_scraper/surfboard_scraper
+WorkingDirectory=/opt/surfboard_scraper
 StandardOutput=inherit
 StandardError=inherit
 Restart=always
-User=pi
+User=root
 
 [Install]
 WantedBy=multi-user.target

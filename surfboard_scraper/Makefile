@@ -23,5 +23,5 @@ package: build
 	rm -rf ${TMP_DIR}
 
 deploy-scraper: package
-	scp surfboard_scraper.tar.gz pi@192.168.4.79:~
-	ssh pi@192.168.4.79 -t 'tar zxvf surfboard_scraper.tar.gz && cd surfboard_scraper && sudo ./install.sh'
+	scp surfboard_scraper.tar.gz deploy/install.sh pi@192.168.4.79:~
+	ssh pi@192.168.4.79 -t 'sudo bash install.sh'
