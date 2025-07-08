@@ -10,3 +10,12 @@
 [Frame](https://www.amazon.com/dp/B0DR1314PN?ref=ppx_yo2ov_dt_b_fed_asin_title)
 [Battery Charger](https://www.adafruit.com/product/1944)
 [Battery](https://www.adafruit.com/product/258)
+
+
+## TODO
+
+- show sunset/sunrise
+- show next n days preview as a separate view
+- move rendering to server-side to simplify having multiple screens!
+- add support for OTA
+
