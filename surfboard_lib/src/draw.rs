@@ -1,14 +1,14 @@
 use core::fmt::Debug;
 
 use crate::data::{ProgramState, TIDE_PREDICTIONS_LEN};
-use crate::image_data::{MIST, MOSTLY_CLEAR, MOSTLY_CLOUDY, SHOWERS, WEATHER_SUNNY};
+use crate::image_data::{MIST, MOSTLY_CLEAR, MOSTLY_CLOUDY, SHOWERS, WAVE, WEATHER_SUNNY, WIND};
 use crate::surf_report::WeatherCondition;
 use crate::surf_report::{SurfReportResponse, WindDirectionType};
 use chrono::{Datelike, FixedOffset, NaiveDateTime, TimeZone, Timelike, Utc};
 use core::fmt::Write;
 use embedded_graphics::image::GetPixel;
 use embedded_graphics::image::ImageRaw;
-use embedded_graphics::mono_font::ascii::{FONT_6X10, FONT_7X13, FONT_8X13, FONT_9X15_BOLD};
+use embedded_graphics::mono_font::ascii::{FONT_6X10, FONT_7X13, FONT_8X13, FONT_9X15, FONT_9X15_BOLD};
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
 use embedded_graphics::pixelcolor::BinaryColor;
@@ -24,7 +24,7 @@ const TIDE_CHART_X_LEFT: i32 = 50;
 const TIDE_CHART_X_RIGHT: i32 = 760;
 const TIDE_CHART_WIDTH: i32 = TIDE_CHART_X_RIGHT - TIDE_CHART_X_LEFT;
 const TIDE_CHART_Y_TOP: i32 = 100;
-const TIDE_CHART_Y_BOTTOM: i32 = 300;
+const TIDE_CHART_Y_BOTTOM: i32 = 220;
 const TIDE_Y_HEIGHT: i32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
 
 #[derive(PartialEq)]
@@ -62,8 +62,8 @@ impl DisplayAction {
             DisplayAction::DisplaySurfReport => match &state.surf_report {
                 Some(surf_report) => {
                     let (min_time, max_time) = draw_tides(target, &surf_report)?;
-                    draw_weather(target, surf_report, min_time, max_time, 410)?;
-                    draw_wind(target, surf_report, min_time, max_time, 430)?;
+                    draw_weather(target, surf_report, min_time, max_time, 350)?;
+                    draw_wind(target, surf_report, min_time, max_time, 400)?;
                     draw_wave_height(target, &surf_report, min_time, max_time, 450)?;
                     draw_headings(target, &surf_report, 20)?;
                     draw_last_updated(target, &surf_report.parse_timestamp_local().unwrap())?;
@@ -197,6 +197,8 @@ where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
 {
+    draw_binary_image_on_tricolor(&ImageRaw::<BinaryColor>::new(WAVE, 32), Point::new(10, y - 16), target);
+
     // find max and min
     let text_style = TextStyleBuilder::new()
         .alignment(Alignment::Left)
@@ -211,7 +213,7 @@ where
         Text::with_text_style(
             txt.as_str(),
             Point::new(x_axis - 10, y),
-            MonoTextStyle::new(&FONT_7X13, TriColor::Black),
+            MonoTextStyle::new(&FONT_9X15, TriColor::Black),
             text_style,
         )
         .draw(target)?;
@@ -230,21 +232,24 @@ where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
 {
+    draw_binary_image_on_tricolor(&ImageRaw::<BinaryColor>::new(WIND, 32), Point::new(10, y - 16), target);
+
     // find max and min
     let text_style = TextStyleBuilder::new()
         .alignment(Alignment::Left)
         .line_height(LineHeight::Percent(100))
         .build();
+
     for data in surf_report.wind.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
         let mut txt: String<16> = String::new();
-        write!(txt, "{:.1}kts", data.speed).unwrap();
+        write!(txt, "{:.1}kt", data.speed).unwrap();
         Text::with_text_style(
             txt.as_str(),
             Point::new(x_axis - 10, y),
-            MonoTextStyle::new(&FONT_7X13, TriColor::Black),
+            MonoTextStyle::new(&FONT_9X15, TriColor::Black),
             text_style,
         )
         .draw(target)?;
@@ -266,7 +271,7 @@ where
                 .into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 1))
                 .draw(target)?;
         } else if data.direction_type == WindDirectionType::Onshore {
-            let l = Line::with_delta(Point::new(x_axis + ARROW_OFFSET_X, y - 6), Point::new(0, 10));
+            let l = Line::with_delta(Point::new(x_axis + ARROW_OFFSET_X, y - 8), Point::new(0, 10));
             l.into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 1))
                 .draw(target)?;
             Line::with_delta(l.end, Point::new(3, -3))
@@ -276,7 +281,7 @@ where
                 .into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 1))
                 .draw(target)?;
         } else if data.direction_type == WindDirectionType::Offshore {
-            let l = Line::with_delta(Point::new(x_axis + ARROW_OFFSET_X, y - 6), Point::new(0, 10));
+            let l = Line::with_delta(Point::new(x_axis + ARROW_OFFSET_X, y - 8), Point::new(0, 10));
             l.into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 1))
                 .draw(target)?;
             Line::with_delta(l.start, Point::new(3, 3))
