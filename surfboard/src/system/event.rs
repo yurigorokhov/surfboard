@@ -1,6 +1,7 @@
 use core::net::Ipv4Addr;
 
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
+use heapless::String;
 
 use crate::task::state::ScreenConfiguration;
 
@@ -20,6 +21,10 @@ pub async fn send_event(event: Events) {
     EVENT_CHANNEL.sender().send(event).await;
 }
 
+pub async fn send_error(error: &str) {
+    send_event(Events::Error(String::try_from(error).expect("Failed to report error"))).await;
+}
+
 /// Receives the next event from the system channel
 ///
 /// Called by the orchestrator task to process events sequentially.
@@ -32,7 +37,7 @@ pub async fn wait() -> Events {
 #[derive(Debug, Clone)]
 pub enum Events {
     WifiConnected(Ipv4Addr),
-    WifiDhcpError,
+    Error(String<30>),
     WifiOff,
     ConfigurationLoaded,
     ScreenUpdateReceived,

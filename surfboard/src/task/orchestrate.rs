@@ -1,21 +1,13 @@
-use defmt::{debug, error, info};
 use embassy_futures::select::select;
 use embassy_time::Timer;
-use heapless::String;
 
 use crate::{
     system::{
         drawing::DisplayAction,
-        event::{wait, Events, WifiAction},
+        event::{send_error, wait, Events, WifiAction},
     },
-    task::{
-        display::display_update,
-        power::POWER_DOWN_SIGNAL,
-        state::{self, ScreenConfiguration, STATE_MANAGER_MUTEX},
-        wifi::retrieve_data,
-    },
+    task::{display::display_update, power::POWER_DOWN_SIGNAL, state::STATE_MANAGER_MUTEX, wifi::retrieve_data},
 };
-use core::fmt::Write;
 
 /// Main coordination task that implements the system's event loop
 #[embassy_executor::task]
@@ -36,38 +28,43 @@ pub async fn start() {
 
 async fn process_event<'a>(event: Events) {
     match event {
+        // shutdown
         Events::OrchestratorTimeout => {
-            // tell wifi to power off
             retrieve_data(WifiAction::PowerOffWifi).await;
         }
         Events::WifiOff => POWER_DOWN_SIGNAL.signal(()),
+
+        // startup
         Events::WifiConnected(_addr) => {
             retrieve_data(WifiAction::LoadConfiguration).await;
         }
         Events::ConfigurationLoaded => {
-            let screen_config: Option<ScreenConfiguration>;
-            {
-                let state_guard = STATE_MANAGER_MUTEX.lock().await;
-                screen_config = Some(state_guard.config.as_ref().unwrap().screens.first().unwrap().clone());
+            let state_guard = STATE_MANAGER_MUTEX.lock().await;
+            match state_guard.config.as_ref() {
+                Some(config) => {
+                    let screen_config = config.screens.first().unwrap().clone();
+                    retrieve_data(WifiAction::LoadScreen(screen_config)).await;
+                }
+                None => {}
             }
-            retrieve_data(WifiAction::LoadScreen(screen_config.unwrap())).await;
         }
-        Events::WifiDhcpError => {
-            error!("Event: WifiDhcpError");
-            let mut txt: String<30> = String::new();
-            let _ = write!(txt, "DHCP error");
-            display_update(DisplayAction::ShowStatusText(txt)).await;
+        Events::Error(msg) => {
+            display_update(DisplayAction::ShowStatusText(msg)).await;
         }
         Events::ScreenUpdateReceived => {
             display_update(DisplayAction::DrawImage).await;
         }
         Events::PowerButtonPressed => {
-            let screen_config: Option<ScreenConfiguration>;
-            {
-                let state_guard = STATE_MANAGER_MUTEX.lock().await;
-                screen_config = Some(state_guard.config.as_ref().unwrap().screens.first().unwrap().clone());
+            let state_guard = STATE_MANAGER_MUTEX.lock().await;
+            match state_guard.config.as_ref() {
+                Some(config) => {
+                    let screen_config = config.screens.first().unwrap().clone();
+                    retrieve_data(WifiAction::LoadScreen(screen_config)).await;
+                }
+                None => {
+                    retrieve_data(WifiAction::LoadConfiguration).await;
+                }
             }
-            retrieve_data(WifiAction::LoadScreen(screen_config.unwrap())).await;
         }
     }
 }
