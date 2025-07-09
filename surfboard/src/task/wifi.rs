@@ -13,25 +13,24 @@ use rand_core::RngCore;
 
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use static_cell::StaticCell;
-use surfboard_lib::data::{surf_report, DataRetrievalAction};
 
 #[cfg(feature = "fake_responses")]
 use crate::fake::fake_http::FakeHttpClient;
 use crate::random::RngWrapper;
-use crate::system::event::{send_event, Events};
-use crate::system::net::HttpClientProvider;
+use crate::system::event::{send_event, Events, WifiAction};
+use crate::system::net::{HttpClientProvider, HttpDataProvider, HttpJsonDataProvider};
 use crate::system::resources::{Irqs, WifiResources};
-use crate::task::state::STATE_MANAGER_MUTEX;
+use crate::task::state::{Configuration, STATE_MANAGER_MUTEX};
 
-pub static DATA_REQUEST_CHANNEL: Channel<CriticalSectionRawMutex, DataRetrievalAction, 4> = Channel::new();
+pub static DATA_REQUEST_CHANNEL: Channel<CriticalSectionRawMutex, WifiAction, 4> = Channel::new();
 
 /// Requests a display update with the specified action
-pub async fn retrieve_data(display_action: DataRetrievalAction) {
+pub async fn retrieve_data(display_action: WifiAction) {
     DATA_REQUEST_CHANNEL.send(display_action).await;
 }
 
 /// Blocks until next update request, returns the requested display action
-async fn wait() -> DataRetrievalAction {
+async fn wait() -> WifiAction {
     DATA_REQUEST_CHANNEL.receive().await
 }
 
@@ -144,19 +143,18 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
         // handle network actions
         control.gpio_set(0, true).await;
         loop {
-            control
-                .set_power_management(cyw43::PowerManagementMode::SuperSave)
-                .await;
+            // TODO: set super saver power mode via orchestrator!
+            // control
+            //     .set_power_management(cyw43::PowerManagementMode::SuperSave)
+            //     .await;
 
             let data_retrieval_action = wait().await;
 
             match data_retrieval_action {
-                DataRetrievalAction::SurfReport => {
-                    control
-                        .set_power_management(cyw43::PowerManagementMode::Performance)
-                        .await;
-
-                    debug!("Fetching surf report");
+                WifiAction::LoadConfiguration => {
+                    // control
+                    //     .set_power_management(cyw43::PowerManagementMode::Performance)
+                    //     .await;
                     {
                         #[cfg(feature = "fake_responses")]
                         let http_provider = FakeHttpClient::default();
@@ -164,16 +162,41 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                         #[cfg(not(feature = "fake_responses"))]
                         let http_provider = HttpClientProvider::new(*stack);
 
-                        let data = surf_report(&http_provider).await.expect("Failed to fetch surf report");
+                        let config: Configuration = http_provider
+                            .get_as_json("https://yurig-public.s3.us-east-1.amazonaws.com/config.json")
+                            .await
+                            .unwrap();
+
                         {
                             let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-                            state_guard.update_surf_report(data);
+                            state_guard.config = Some(config);
                         }
-                        send_event(Events::SurfReportRetrieved).await;
+                        send_event(Events::ConfigurationLoaded).await;
                     }
-                    debug!("Done fetching tide data");
                 }
-                DataRetrievalAction::PowerOffWifi => {
+                WifiAction::LoadScreen(screen_configuration) => {
+                    // control
+                    //     .set_power_management(cyw43::PowerManagementMode::Performance)
+                    //     .await;
+
+                    {
+                        #[cfg(feature = "fake_responses")]
+                        let http_provider = FakeHttpClient::default();
+
+                        #[cfg(not(feature = "fake_responses"))]
+                        let http_provider = HttpClientProvider::new(*stack);
+
+                        {
+                            let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
+                            http_provider
+                                .get(screen_configuration.url.as_str(), &mut state_guard.server_side_image)
+                                .await
+                                .expect("Failed to fetch server side image");
+                        }
+                        send_event(Events::ScreenUpdateReceived).await;
+                    }
+                }
+                WifiAction::PowerOffWifi => {
                     control.gpio_set(0, false).await;
                     break;
                 }

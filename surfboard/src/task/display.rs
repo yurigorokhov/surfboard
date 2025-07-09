@@ -1,6 +1,9 @@
 use core::cell::RefCell;
 
-use crate::{system::resources::ScreenResources, task::state::STATE_MANAGER_MUTEX};
+use crate::{
+    system::{drawing::DisplayAction, resources::ScreenResources},
+    task::state::STATE_MANAGER_MUTEX,
+};
 use defmt::*;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDeviceWithConfig;
 use embassy_rp::{
@@ -17,7 +20,6 @@ use epd_waveshare::epd7in5b_v3::Display7in5;
 use epd_waveshare::epd7in5b_v3::Epd7in5;
 use epd_waveshare::prelude::WaveshareDisplay;
 use static_cell::StaticCell;
-use surfboard_lib::draw::DisplayAction;
 
 pub static DISPLAY_CHANNEL: Channel<CriticalSectionRawMutex, DisplayAction, 4> = Channel::new();
 
@@ -119,7 +121,7 @@ pub async fn start(r: ScreenResources) {
     loop {
         // Wait for the next display update request and clear the display
         let display_action = wait().await;
-        if display_action == DisplayAction::DisplaySurfReport {
+        if display_action == DisplayAction::DrawImage {
             canvas.clear(epd_waveshare::color::TriColor::White).unwrap();
         }
 

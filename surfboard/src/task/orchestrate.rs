@@ -2,11 +2,18 @@ use defmt::{debug, error, info};
 use embassy_futures::select::select;
 use embassy_time::Timer;
 use heapless::String;
-use surfboard_lib::{data::DataRetrievalAction, draw::DisplayAction};
 
 use crate::{
-    system::event::{wait, Events},
-    task::{display::display_update, power::POWER_DOWN_SIGNAL, wifi::retrieve_data},
+    system::{
+        drawing::DisplayAction,
+        event::{wait, Events, WifiAction},
+    },
+    task::{
+        display::display_update,
+        power::POWER_DOWN_SIGNAL,
+        state::{self, ScreenConfiguration, STATE_MANAGER_MUTEX},
+        wifi::retrieve_data,
+    },
 };
 use core::fmt::Write;
 
@@ -31,11 +38,19 @@ async fn process_event<'a>(event: Events) {
     match event {
         Events::OrchestratorTimeout => {
             // tell wifi to power off
-            retrieve_data(DataRetrievalAction::PowerOffWifi).await;
+            retrieve_data(WifiAction::PowerOffWifi).await;
         }
         Events::WifiOff => POWER_DOWN_SIGNAL.signal(()),
         Events::WifiConnected(_addr) => {
-            retrieve_data(DataRetrievalAction::SurfReport).await;
+            retrieve_data(WifiAction::LoadConfiguration).await;
+        }
+        Events::ConfigurationLoaded => {
+            let screen_config: Option<ScreenConfiguration>;
+            {
+                let state_guard = STATE_MANAGER_MUTEX.lock().await;
+                screen_config = Some(state_guard.config.as_ref().unwrap().screens.first().unwrap().clone());
+            }
+            retrieve_data(WifiAction::LoadScreen(screen_config.unwrap())).await;
         }
         Events::WifiDhcpError => {
             error!("Event: WifiDhcpError");
@@ -43,12 +58,16 @@ async fn process_event<'a>(event: Events) {
             let _ = write!(txt, "DHCP error");
             display_update(DisplayAction::ShowStatusText(txt)).await;
         }
-        Events::SurfReportRetrieved => {
-            debug!("Received tide predictions!");
-            display_update(DisplayAction::DisplaySurfReport).await;
+        Events::ScreenUpdateReceived => {
+            display_update(DisplayAction::DrawImage).await;
         }
         Events::PowerButtonPressed => {
-            info!("Power button pressed!");
+            let screen_config: Option<ScreenConfiguration>;
+            {
+                let state_guard = STATE_MANAGER_MUTEX.lock().await;
+                screen_config = Some(state_guard.config.as_ref().unwrap().screens.first().unwrap().clone());
+            }
+            retrieve_data(WifiAction::LoadScreen(screen_config.unwrap())).await;
         }
     }
 }

@@ -1,7 +1,8 @@
+use anyhow::{Result, anyhow};
 use reqwest::Error;
 use serde::de::DeserializeOwned;
 
-pub async fn fetch<T: DeserializeOwned>(url: &str) -> Result<T, Box<dyn std::error::Error>> {
+pub async fn fetch<T: DeserializeOwned>(url: &str) -> Result<T> {
     let response = reqwest::get(url).await;
 
     match response {
@@ -10,17 +11,11 @@ pub async fn fetch<T: DeserializeOwned>(url: &str) -> Result<T, Box<dyn std::err
                 let json: Result<T, Error> = res.json().await;
                 match json {
                     Ok(json_data) => Ok(json_data),
-                    Err(e) => Err(Box::new(e)),
+                    Err(e) => Err(e.into()),
                 }
             }
-            false => Err(Box::new(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                format!("Request failed with status: {}", res.status()),
-            ))),
+            false => Err(anyhow!("Request failed with status: {}", res.status())),
         },
-        Err(err) => Err(Box::new(std::io::Error::new(
-            std::io::ErrorKind::Other,
-            format!("Request failed : {}", err.to_string()),
-        ))),
+        Err(err) => Err(err.into()),
     }
 }
