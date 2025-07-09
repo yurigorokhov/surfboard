@@ -1,5 +1,5 @@
 {
-  "last_updated_utc": 1752079461,
+  "last_updated_utc": 1752089022,
   "waves": [
     {
       "timestamp": 1752066000,
@@ -15,8 +15,8 @@
       "surf": {
         "min": 2,
         "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
+        "plus": false,
+        "humanRelation": "Thigh to waist"
       }
     },
     {
@@ -42,8 +42,8 @@
       "surf": {
         "min": 2,
         "max": 3,
-        "plus": true,
-        "humanRelation": "Thigh to stomach"
+        "plus": false,
+        "humanRelation": "Thigh to waist"
       }
     },
     {
@@ -85,10 +85,10 @@
     {
       "timestamp": 1752163200,
       "surf": {
-        "min": 2,
-        "max": 3,
+        "min": 1,
+        "max": 2,
         "plus": false,
-        "humanRelation": "Thigh to waist"
+        "humanRelation": "Knee to thigh"
       }
     }
   ],
@@ -315,137 +315,137 @@
       "timestamp": 1752066000,
       "utcOffset": -7,
       "condition": "MOSTLY_CLOUDY",
-      "temperature": 56.69604
+      "temperature": 56.66004
     },
     {
       "timestamp": 1752076800,
       "utcOffset": -7,
-      "condition": "MOSTLY_CLOUDY",
-      "temperature": 57.29
+      "condition": "MOSTLY_CLEAR",
+      "temperature": 58.11804
     },
     {
       "timestamp": 1752087600,
       "utcOffset": -7,
-      "condition": "MOSTLY_CLEAR",
-      "temperature": 57.83
+      "condition": "CLEAR",
+      "temperature": 66.038
     },
     {
       "timestamp": 1752098400,
       "utcOffset": -7,
       "condition": "CLEAR",
-      "temperature": 70.08804
+      "temperature": 74.31796
     },
     {
       "timestamp": 1752109200,
       "utcOffset": -7,
       "condition": "CLEAR",
-      "temperature": 67.1
+      "temperature": 67.712
     },
     {
       "timestamp": 1752120000,
       "utcOffset": -7,
       "condition": "CLEAR",
-      "temperature": 56.80396
+      "temperature": 57.92
     },
     {
       "timestamp": 1752130800,
       "utcOffset": -7,
       "condition": "NIGHT_CLEAR",
-      "temperature": 52.772
+      "temperature": 53.816
     },
     {
       "timestamp": 1752141600,
       "utcOffset": -7,
       "condition": "NIGHT_CLEAR",
-      "temperature": 49.802
+      "temperature": 51.04404
     },
     {
       "timestamp": 1752152400,
       "utcOffset": -7,
-      "condition": "CLEAR",
-      "temperature": 49.19
+      "condition": "MOSTLY_CLEAR",
+      "temperature": 49.73
     },
     {
       "timestamp": 1752163200,
       "utcOffset": -7,
       "condition": "CLEAR",
-      "temperature": 51.674
+      "temperature": 56.174
     }
   ],
   "wind": [
     {
       "timestamp": 1752066000,
       "utcOffset": -7,
-      "direction": 140.67055,
+      "direction": 185.37897,
       "directionType": "Onshore",
-      "speed": 1.32917
+      "speed": 1.92283
     },
     {
       "timestamp": 1752076800,
       "utcOffset": -7,
-      "direction": 197.56363,
+      "direction": 180.85472,
       "directionType": "Onshore",
-      "speed": 2.1824
+      "speed": 2.80152
     },
     {
       "timestamp": 1752087600,
       "utcOffset": -7,
-      "direction": 216.18944,
+      "direction": 217.15527,
       "directionType": "Onshore",
-      "speed": 4.28533
+      "speed": 4.69971
     },
     {
       "timestamp": 1752098400,
       "utcOffset": -7,
-      "direction": 170.99974,
+      "direction": 172.18929,
       "directionType": "Onshore",
-      "speed": 4.79107
+      "speed": 4.91196
     },
     {
       "timestamp": 1752109200,
       "utcOffset": -7,
-      "direction": 155.23984,
+      "direction": 157.78223,
       "directionType": "Onshore",
-      "speed": 5.91929
+      "speed": 5.64449
     },
     {
       "timestamp": 1752120000,
       "utcOffset": -7,
-      "direction": 158.94447,
+      "direction": 152.76288,
       "directionType": "Onshore",
-      "speed": 3.89069
+      "speed": 4.24505
     },
     {
       "timestamp": 1752130800,
       "utcOffset": -7,
-      "direction": 209.19067,
+      "direction": 204.03989,
       "directionType": "Onshore",
-      "speed": 2.4066
+      "speed": 2.23209
     },
     {
       "timestamp": 1752141600,
       "utcOffset": -7,
-      "direction": 170.91959,
+      "direction": 175.46709,
       "directionType": "Onshore",
-      "speed": 2.44824
+      "speed": 1.99843
     },
     {
       "timestamp": 1752152400,
       "utcOffset": -7,
-      "direction": 203.30992,
+      "direction": 187.94537,
       "directionType": "Onshore",
-      "speed": 0.84053
+      "speed": 1.58744
     },
     {
       "timestamp": 1752163200,
       "utcOffset": -7,
-      "direction": 211.99681,
+      "direction": 211.26576,
       "directionType": "Onshore",
-      "speed": 2.73973
+      "speed": 2.95043
     }
   ],
   "conditions": {
-    "headline": "Smaller, still fun surf as swell fades, most size in AM.  Southerly wind stay on the lighter side. "
+    "headline": "Smaller, still fun surf as swell slowly fades.  Southerly wind stay on the lighter side all day. "
   },
   "spot_details": {
     "name": "Pleasure Point"

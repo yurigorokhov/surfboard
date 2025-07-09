@@ -1,24 +1,31 @@
 use anyhow::Result;
 use chrono::prelude::*;
+use core::fmt::Debug;
+use embedded_graphics::prelude::*;
+use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
+use epd_waveshare::color::TriColor;
 
 use serde::{Deserialize, Serialize};
 
-pub const MEASUREMENTS_TIDE: usize = 36;
-pub const MEASUREMENTS_WAVE: usize = 10;
-pub const MEASUREMENTS_WIND: usize = 10;
-pub const MEASUREMENTS_WEATHER: usize = 10;
+const MEASUREMENTS_TIDE: usize = 36;
+const MEASUREMENTS_WAVE: usize = 10;
+const MEASUREMENTS_WIND: usize = 10;
+const MEASUREMENTS_WEATHER: usize = 10;
 
 use crate::{
-    surf_report_24h::conditions::{ConditionsMeasurement, ConditionsResult},
-    surf_report_24h::spot_details::{SpotDetails, SpotDetailsResult},
-    surf_report_24h::tide::{TideMeasurement, TideResult},
-    surf_report_24h::wave::{WaveMeasurement, WaveResult},
-    surf_report_24h::weather::{WeatherMeasurement, WeatherResult},
-    surf_report_24h::wind::{WindMeasurement, WindResult},
+    surf_report_24h::draw::draw,
+    surfline_types::{
+        conditions::{ConditionsMeasurement, ConditionsResult, fetch_conditions},
+        spot_details::{SpotDetails, SpotDetailsResult, fetch_spot_details},
+        tide::{TideMeasurement, TideResult, fetch_tides},
+        wave::{WaveMeasurement, WaveResult, fetch_waves},
+        weather::{WeatherMeasurement, WeatherResult, fetch_weather},
+        wind::{WindMeasurement, WindResult, fetch_wind},
+    },
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SurfReport {
+pub struct SurfReport24H {
     pub last_updated_utc: i64,
     pub waves: Vec<WaveMeasurement>,
     pub tides: Vec<TideMeasurement>,
@@ -28,7 +35,18 @@ pub struct SurfReport {
     pub spot_details: SpotDetails,
 }
 
-impl SurfReport {
+impl SurfReport24H {
+    pub async fn fetch_latest(spot_id: &str) -> Result<Self> {
+        Ok(SurfReport24H::new_from_results(
+            fetch_waves(spot_id).await?,
+            fetch_tides(spot_id).await?,
+            fetch_weather(spot_id).await?,
+            fetch_wind(spot_id).await?,
+            fetch_conditions(spot_id).await?,
+            fetch_spot_details(spot_id).await?,
+        ))
+    }
+
     pub fn new_from_results(
         wave_result: WaveResult,
         tide_result: TideResult,
@@ -38,7 +56,7 @@ impl SurfReport {
         spot_details_result: SpotDetailsResult,
     ) -> Self {
         let now = Utc::now();
-        SurfReport {
+        SurfReport24H {
             last_updated_utc: now.timestamp(),
             waves: wave_result
                 .data
@@ -84,5 +102,26 @@ impl SurfReport {
         let offset = FixedOffset::west_opt(-7 * 3600).unwrap();
         let local_time = self.parse_timestamp_utc()?.naive_local();
         Ok(offset.from_local_datetime(&local_time).unwrap().naive_utc())
+    }
+
+    pub fn draw<D, E>(&self, target: &mut D) -> Result<(), E>
+    where
+        E: Debug,
+        D: DrawTarget<Color = TriColor, Error = E>,
+    {
+        draw(target, self)
+    }
+
+    pub fn draw_to_qoi<W>(&self, writer: &mut W) -> Result<()>
+    where
+        W: std::io::Write + std::io::Seek,
+    {
+        let mut display = SimulatorDisplay::<TriColor>::new(Size::new(800, 480));
+        self.draw(&mut display)?;
+        let output_settings = OutputSettingsBuilder::new().scale(1).build();
+        let output_image = display.to_rgb_output_image(&output_settings);
+        let image_buffer = output_image.as_image_buffer();
+        image_buffer.write_to(writer, image::ImageFormat::Qoi).unwrap();
+        Ok(())
     }
 }

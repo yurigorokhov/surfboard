@@ -5,7 +5,7 @@ use core::fmt::Debug;
 use core::fmt::Write;
 use embedded_graphics::image::GetPixel;
 use embedded_graphics::image::ImageRaw;
-use embedded_graphics::mono_font::ascii::{FONT_6X10, FONT_7X13, FONT_8X13, FONT_9X15, FONT_9X15_BOLD};
+use embedded_graphics::mono_font::ascii::{FONT_7X13, FONT_8X13, FONT_9X15, FONT_9X15_BOLD};
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
 use embedded_graphics::pixelcolor::BinaryColor;
@@ -23,9 +23,9 @@ const TIDE_CHART_Y_TOP: i32 = 100;
 const TIDE_CHART_Y_BOTTOM: i32 = 220;
 const TIDE_Y_HEIGHT: i32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
 
-use crate::surf_report_24h::surf_report::SurfReport;
-use crate::surf_report_24h::weather::WeatherCondition;
-use crate::surf_report_24h::wind::WindDirectionType;
+use crate::surf_report_24h::surf_report::SurfReport24H;
+use crate::surfline_types::weather::WeatherCondition;
+use crate::surfline_types::wind::WindDirectionType;
 
 fn get_local_time_from_unix(unix_timestamp: i64, offset: i32) -> NaiveDateTime {
     let time = Utc.timestamp_opt(unix_timestamp, 0).unwrap().naive_local();
@@ -33,7 +33,7 @@ fn get_local_time_from_unix(unix_timestamp: i64, offset: i32) -> NaiveDateTime {
     offset.from_local_datetime(&time).unwrap().naive_utc()
 }
 
-pub fn draw<D, E>(target: &mut D, surf_report: &SurfReport) -> Result<(), E>
+pub fn draw<D, E>(target: &mut D, surf_report: &SurfReport24H) -> Result<(), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
@@ -47,7 +47,7 @@ where
     Ok(())
 }
 
-pub fn draw_tides<D, E>(target: &mut D, surf_report: &SurfReport) -> Result<(i64, i64), E>
+pub fn draw_tides<D, E>(target: &mut D, surf_report: &SurfReport24H) -> Result<(i64, i64), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
@@ -154,7 +154,7 @@ where
 
 pub fn draw_wave_height<D, E>(
     target: &mut D,
-    surf_report: &SurfReport,
+    surf_report: &SurfReport24H,
     min_time: i64,
     max_time: i64,
     y: i32,
@@ -187,7 +187,13 @@ where
     Ok(())
 }
 
-pub fn draw_wind<D, E>(target: &mut D, surf_report: &SurfReport, min_time: i64, max_time: i64, y: i32) -> Result<(), E>
+pub fn draw_wind<D, E>(
+    target: &mut D,
+    surf_report: &SurfReport24H,
+    min_time: i64,
+    max_time: i64,
+    y: i32,
+) -> Result<(), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
@@ -257,7 +263,7 @@ where
 
 pub fn draw_weather<D, E>(
     target: &mut D,
-    surf_report: &SurfReport,
+    surf_report: &SurfReport24H,
     min_time: i64,
     max_time: i64,
     y: i32,
@@ -267,10 +273,10 @@ where
     D: DrawTarget<Color = TriColor, Error = E>,
 {
     // find max and min
-    let text_style = TextStyleBuilder::new()
-        .alignment(Alignment::Left)
-        .line_height(LineHeight::Percent(100))
-        .build();
+    // let text_style = TextStyleBuilder::new()
+    //     .alignment(Alignment::Left)
+    //     .line_height(LineHeight::Percent(100))
+    //     .build();
     for data in surf_report.weather.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
@@ -311,18 +317,17 @@ where
                     Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
                     target,
                 );
-            }
-            _ => {
-                let mut txt: String = String::new();
-                write!(txt, "{:?}", data.condition).unwrap();
-                Text::with_text_style(
-                    txt.as_str(),
-                    Point::new(x_axis - 10, y),
-                    MonoTextStyle::new(&FONT_6X10, TriColor::Black),
-                    text_style,
-                )
-                .draw(target)?;
-            }
+            } // _ => {
+              //     let mut txt: String = String::new();
+              //     write!(txt, "{:?}", data.condition).unwrap();
+              //     Text::with_text_style(
+              //         txt.as_str(),
+              //         Point::new(x_axis - 10, y),
+              //         MonoTextStyle::new(&FONT_6X10, TriColor::Black),
+              //         text_style,
+              //     )
+              //     .draw(target)?;
+              // }
         }
     }
     Ok(())
@@ -342,7 +347,7 @@ where
     }
 }
 
-pub fn draw_headings<D, E>(target: &mut D, surf_report: &SurfReport, y: i32) -> Result<(), E>
+pub fn draw_headings<D, E>(target: &mut D, surf_report: &SurfReport24H, y: i32) -> Result<(), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
