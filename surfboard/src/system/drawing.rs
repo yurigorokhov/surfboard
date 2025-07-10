@@ -15,35 +15,35 @@ use crate::task::state::ProgramState;
 
 #[derive(PartialEq)]
 pub enum DisplayAction {
-    ShowStatusText(String<30>),
-    DrawImage,
+    ShowStatusText(String<30>, i32),
+    DrawImage(usize),
     DisplayPowerOff,
 }
 
 impl DisplayAction {
-    pub fn draw<D, E>(self, target: &mut D, state: &ProgramState) -> Result<(), E>
+    pub fn draw<D, E>(&self, target: &mut D, state: &ProgramState) -> Result<(), E>
     where
         E: Debug,
         D: DrawTarget<Color = Color, Error = E>,
     {
         match self {
-            DisplayAction::ShowStatusText(text) => {
+            DisplayAction::ShowStatusText(text, line_number) => {
                 let text_style = TextStyleBuilder::new()
                     .alignment(Alignment::Left)
                     .line_height(LineHeight::Percent(150))
                     .build();
                 Text::with_text_style(
                     text.as_str(),
-                    Point::new(20, 30),
+                    Point::new(20, 20 + (16 * line_number)),
                     MonoTextStyle::new(&FONT_10X20, Color::White),
                     text_style,
                 )
                 .draw(target)?;
                 Ok(())
             }
-            DisplayAction::DrawImage => {
+            DisplayAction::DrawImage(screen_idx) => {
                 let zero = Point::zero();
-                let image = Qoi::new(&state.get_buffer()).expect("Failed to parse image");
+                let image = Qoi::new(state.get_buffer_for_screen(*screen_idx).unwrap()).expect("Failed to parse image");
                 let pixels = image
                     .pixels()
                     .enumerate()

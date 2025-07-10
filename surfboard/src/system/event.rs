@@ -41,7 +41,7 @@ pub enum Events {
     WifiOff,
     DisplayOff,
     ConfigurationLoaded,
-    ScreenUpdateReceived,
+    ScreenLoaded(usize),
     OrchestratorTimeout,
     PowerButtonPressed,
 }
@@ -49,6 +49,6 @@ pub enum Events {
 #[derive(Debug, Clone)]
 pub enum WifiAction {
     LoadConfiguration,
-    LoadScreen(ScreenConfiguration),
+    LoadScreen(usize, ScreenConfiguration),
     PowerOffWifi,
 }

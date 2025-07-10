@@ -112,7 +112,7 @@ pub async fn start(r: ScreenResources) {
 
     // clear display
     let mut canvas = Display7in5::default();
-    canvas.clear(epd_waveshare::color::Color::White).unwrap();
+    canvas.clear(epd_waveshare::color::Color::Black).unwrap();
 
     loop {
         // Wait for the next display update request and clear the display
@@ -124,10 +124,6 @@ pub async fn start(r: ScreenResources) {
             break;
         }
 
-        if display_action == DisplayAction::DrawImage {
-            canvas.clear(epd_waveshare::color::Color::White).unwrap();
-        }
-
         display.wake_up().expect("Failed to wake up");
         {
             let state_guard = STATE_MANAGER_MUTEX.lock().await;
@@ -135,7 +131,15 @@ pub async fn start(r: ScreenResources) {
                 .draw(&mut canvas, &*state_guard)
                 .expect("Failed to draw splash screen");
         }
+
         display.draw(canvas.buffer()).expect("Failed to draw on screen");
+
+        // after drawing an image, let's clear out the buffer so it's ready to use again
+        if let DisplayAction::DrawImage(screen_idx) = &display_action {
+            let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
+            state_guard.forget_screen_idx(*screen_idx);
+        }
+
         display.sleep().expect("Failed to put screen to sleep");
     }
 }

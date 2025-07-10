@@ -141,13 +141,13 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
         debug!("Wifi setup!");
 
         // handle network actions
-        control.gpio_set(0, true).await;
         loop {
             control
                 .set_power_management(cyw43::PowerManagementMode::SuperSave)
                 .await;
 
             let data_retrieval_action = wait().await;
+            control.gpio_set(0, true).await;
 
             match data_retrieval_action {
                 WifiAction::LoadConfiguration => {
@@ -171,7 +171,7 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     }
                     send_event(Events::ConfigurationLoaded).await;
                 }
-                WifiAction::LoadScreen(screen_configuration) => {
+                WifiAction::LoadScreen(screen_idx, screen_configuration) => {
                     control
                         .set_power_management(cyw43::PowerManagementMode::Performance)
                         .await;
@@ -183,13 +183,13 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     let http_provider = HttpClientProvider::new(*stack);
 
                     let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-                    state_guard.get_mut_buffer().clear();
-                    match http_provider
-                        .get(screen_configuration.url.as_str(), &mut state_guard.get_mut_buffer())
-                        .await
-                    {
+
+                    // get mutable buffer to store screen data into
+                    let buffer = state_guard.get_mut_buffer_for_screen(screen_idx).unwrap();
+
+                    match http_provider.get(screen_configuration.url.as_str(), buffer).await {
                         Some(_) => {
-                            send_event(Events::ScreenUpdateReceived).await;
+                            send_event(Events::ScreenLoaded(screen_idx)).await;
                         }
                         None => {
                             send_error("Failed to fetch screen").await;
@@ -197,10 +197,10 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     }
                 }
                 WifiAction::PowerOffWifi => {
-                    control.gpio_set(0, false).await;
                     break;
                 }
             }
+            control.gpio_set(0, false).await;
         }
     }
     send_event(Events::WifiOff).await;
