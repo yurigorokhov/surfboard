@@ -1,9 +1,11 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use chrono::prelude::*;
 use core::fmt::Debug;
 use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 use epd_waveshare::color::TriColor;
+use serde_json::Value;
+use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
@@ -25,7 +27,12 @@ use crate::{
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SurfReport24H {
+pub struct SurfReport24HDataParams {
+    spot_id: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SurfReport24HData {
     pub last_updated_utc: i64,
     pub waves: Vec<WaveMeasurement>,
     pub tides: Vec<TideMeasurement>,
@@ -35,9 +42,10 @@ pub struct SurfReport24H {
     pub spot_details: SpotDetails,
 }
 
-impl SurfReport24H {
-    pub async fn fetch_latest(spot_id: &str) -> Result<Self> {
-        Ok(SurfReport24H::new_from_results(
+impl SurfReport24HData {
+    pub async fn new_from_params(params: &SurfReport24HDataParams) -> Result<Self> {
+        let spot_id = params.spot_id.as_str();
+        Ok(SurfReport24HData::new_from_results(
             fetch_waves(spot_id).await?,
             fetch_tides(spot_id).await?,
             fetch_weather(spot_id).await?,
@@ -45,6 +53,13 @@ impl SurfReport24H {
             fetch_conditions(spot_id).await?,
             fetch_spot_details(spot_id).await?,
         ))
+    }
+
+    pub fn parse_params(params: &HashMap<String, Value>) -> Result<SurfReport24HDataParams> {
+        let spot_id = params.get("spot_id").unwrap().as_str().unwrap();
+        Ok(SurfReport24HDataParams {
+            spot_id: spot_id.into(),
+        })
     }
 
     pub fn new_from_results(
@@ -56,7 +71,7 @@ impl SurfReport24H {
         spot_details_result: SpotDetailsResult,
     ) -> Self {
         let now = Utc::now();
-        SurfReport24H {
+        SurfReport24HData {
             last_updated_utc: now.timestamp(),
             waves: wave_result
                 .data

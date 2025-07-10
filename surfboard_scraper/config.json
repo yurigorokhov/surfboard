@@ -1,8 +1,0 @@
-{
-    "screens": [
-        {
-            "key": "surf_report_24h",
-            "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report.qoi"
-        }
-    ]
-}

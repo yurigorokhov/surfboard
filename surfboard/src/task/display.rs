@@ -1,7 +1,11 @@
 use core::cell::RefCell;
 
 use crate::{
-    system::{drawing::DisplayAction, resources::ScreenResources},
+    system::{
+        drawing::DisplayAction,
+        event::{send_event, Events},
+        resources::ScreenResources,
+    },
     task::state::STATE_MANAGER_MUTEX,
 };
 use defmt::*;
@@ -16,8 +20,8 @@ use embassy_sync::blocking_mutex::Mutex;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
 use embassy_time::Delay;
 use embedded_graphics::prelude::*;
-use epd_waveshare::epd7in5b_v3::Display7in5;
-use epd_waveshare::epd7in5b_v3::Epd7in5;
+use epd_waveshare::epd7in5_v2::Display7in5;
+use epd_waveshare::epd7in5_v2::Epd7in5;
 use epd_waveshare::prelude::WaveshareDisplay;
 use static_cell::StaticCell;
 
@@ -42,7 +46,6 @@ pub trait Screen {
     fn power_on(&mut self);
     fn power_off(&mut self);
     fn draw(&mut self, buffer: &[u8]) -> Result<(), ScreenError>;
-    fn draw_partial(&mut self, buffer: &[u8], x: u32, y: u32, width: u32, height: u32) -> Result<(), ScreenError>;
     fn sleep(&mut self) -> Result<(), ScreenError>;
     fn wake_up(&mut self) -> Result<(), ScreenError>;
 
@@ -99,13 +102,6 @@ where
             .update_and_display_frame(self.spi_device, buffer, &mut self.delay)
             .map_err(|_| ScreenError::SpiError)?)
     }
-
-    fn draw_partial(&mut self, buffer: &[u8], x: u32, y: u32, width: u32, height: u32) -> Result<(), ScreenError> {
-        Ok(self
-            .epd
-            .update_partial_frame2(self.spi_device, buffer, x, y, width, height, &mut self.delay)
-            .map_err(|_| ScreenError::SpiError)?)
-    }
 }
 
 #[embassy_executor::task]
@@ -116,13 +112,20 @@ pub async fn start(r: ScreenResources) {
 
     // clear display
     let mut canvas = Display7in5::default();
-    canvas.clear(epd_waveshare::color::TriColor::White).unwrap();
+    canvas.clear(epd_waveshare::color::Color::White).unwrap();
 
     loop {
         // Wait for the next display update request and clear the display
         let display_action = wait().await;
+
+        if display_action == DisplayAction::DisplayPowerOff {
+            display.power_off();
+            send_event(Events::DisplayOff).await;
+            break;
+        }
+
         if display_action == DisplayAction::DrawImage {
-            canvas.clear(epd_waveshare::color::TriColor::White).unwrap();
+            canvas.clear(epd_waveshare::color::Color::White).unwrap();
         }
 
         display.wake_up().expect("Failed to wake up");

@@ -7,7 +7,7 @@ use embedded_graphics::{
     prelude::*,
     text::{Alignment, LineHeight, Text, TextStyleBuilder},
 };
-use epd_waveshare::color::TriColor;
+use epd_waveshare::color::Color;
 use heapless::String;
 use tinyqoi::Qoi;
 
@@ -17,13 +17,14 @@ use crate::task::state::ProgramState;
 pub enum DisplayAction {
     ShowStatusText(String<30>),
     DrawImage,
+    DisplayPowerOff,
 }
 
 impl DisplayAction {
     pub fn draw<D, E>(self, target: &mut D, state: &ProgramState) -> Result<(), E>
     where
         E: Debug,
-        D: DrawTarget<Color = TriColor, Error = E>,
+        D: DrawTarget<Color = Color, Error = E>,
     {
         match self {
             DisplayAction::ShowStatusText(text) => {
@@ -34,7 +35,7 @@ impl DisplayAction {
                 Text::with_text_style(
                     text.as_str(),
                     Point::new(20, 30),
-                    MonoTextStyle::new(&FONT_10X20, TriColor::Black),
+                    MonoTextStyle::new(&FONT_10X20, Color::White),
                     text_style,
                 )
                 .draw(target)?;
@@ -42,7 +43,7 @@ impl DisplayAction {
             }
             DisplayAction::DrawImage => {
                 let zero = Point::zero();
-                let image = Qoi::new(&state.server_side_image).expect("Failed ot parse image");
+                let image = Qoi::new(&state.server_side_image).expect("Failed to parse image");
                 let pixels = image
                     .pixels()
                     .enumerate()
@@ -50,16 +51,17 @@ impl DisplayAction {
                 let _ = target.draw_iter(pixels);
                 Ok(())
             }
+            DisplayAction::DisplayPowerOff => Ok(()),
         }
     }
 }
 
-fn rgb888_to_bw(color: Rgb888) -> TriColor {
+fn rgb888_to_bw(color: Rgb888) -> Color {
     // Use luminance formula: 0.299*R + 0.587*G + 0.114*B
     let luminance = 0.299 * (color.r() as f32) + 0.587 * (color.g() as f32) + 0.114 * (color.b() as f32);
     if luminance > 128.0 {
-        TriColor::White
+        Color::Black
     } else {
-        TriColor::Black
+        Color::White
     }
 }

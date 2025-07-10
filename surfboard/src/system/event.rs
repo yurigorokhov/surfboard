@@ -39,6 +39,7 @@ pub enum Events {
     WifiConnected(Ipv4Addr),
     Error(String<30>),
     WifiOff,
+    DisplayOff,
     ConfigurationLoaded,
     ScreenUpdateReceived,
     OrchestratorTimeout,

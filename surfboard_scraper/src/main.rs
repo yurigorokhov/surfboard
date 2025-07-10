@@ -2,16 +2,19 @@ mod http;
 mod image_data;
 mod surf_report_24h;
 mod surfline_types;
+mod util;
 
 use anyhow::Result;
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_s3::{Client, types::ObjectCannedAcl};
 use std::io::Cursor;
-use tokio::time::{Duration, sleep};
+use surfboard_scraper::device_config::Configuration;
+use tokio::{
+    fs,
+    time::{Duration, sleep},
+};
 
-use crate::surf_report_24h::surf_report::SurfReport24H;
-
-const PLEASURE_POINT_SPOT_ID: &str = "5842041f4e65fad6a7708807";
+use crate::{surf_report_24h::data::SurfReport24HData, util::parse_s3_url};
 
 pub async fn upload_object(
     client: &aws_sdk_s3::Client,
@@ -47,6 +50,8 @@ pub async fn upload_bytes(
         .unwrap())
 }
 
+const CONFIG_PATH: &'static str = "deploy/config.json";
+
 #[tokio::main]
 async fn main() -> Result<()> {
     // TODO: graceful shutdown
@@ -61,15 +66,30 @@ async fn main() -> Result<()> {
     let client = Client::new(&config);
 
     loop {
-        // draw surf report as image
-        let mut bytes: Vec<u8> = Vec::new();
-        SurfReport24H::fetch_latest(PLEASURE_POINT_SPOT_ID)
-            .await?
-            .draw_to_qoi(&mut Cursor::new(&mut bytes))?;
+        // read config file
+        let config: Configuration = serde_json::from_str(fs::read_to_string(CONFIG_PATH).await?.as_str())?;
+        for screen in config.screens {
+            let params = SurfReport24HData::parse_params(&screen.params)?;
+            let mut bytes: Vec<u8> = Vec::new();
+            SurfReport24HData::new_from_params(&params)
+                .await?
+                .draw_to_qoi(&mut Cursor::new(&mut bytes))?;
 
-        // upload surf report image
-        upload_bytes(&client, "yurig-public", &bytes, "surf_report.qoi").await?;
-        println!("Uploaded");
+            // upload surf report image
+            match parse_s3_url(&screen.url) {
+                Ok((bucket, path)) => {
+                    upload_bytes(&client, &bucket, &bytes, &path).await?;
+                    println!("Uploaded: {} bytes: {}", screen.url, &bytes.len());
+                }
+                Err(e) => {
+                    println!("Error: {:#?}", e);
+                }
+            }
+        }
+
+        let config_str = fs::read(CONFIG_PATH).await?;
+        upload_bytes(&client, "yurig-public", config_str.as_slice(), "config.json").await?;
+        println!("Uploaded config, bytes: {}", config_str.as_slice().len());
 
         sleep(Duration::from_secs(3600 * 3)).await;
     }

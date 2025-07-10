@@ -12,7 +12,6 @@ pub struct Configuration {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ScreenConfiguration {
-    pub key: String<32>,
     pub url: String<128>,
 }
 
@@ -21,10 +20,29 @@ const SERVER_SIDE_IMAGE_BYTES: usize = 1024 * 24;
 #[derive(Default)]
 pub struct ProgramState {
     pub config: Option<Configuration>,
+    pub screen_index: usize,
     pub server_side_image: Vec<u8, SERVER_SIDE_IMAGE_BYTES>,
+}
+
+impl ProgramState {
+    pub fn next_screen(&mut self) {
+        match &self.config {
+            Some(config) => {
+                if self.screen_index >= config.screens.len() - 1 {
+                    self.screen_index = 0;
+                } else {
+                    self.screen_index += 1;
+                }
+            }
+            None => {
+                self.screen_index = 0;
+            }
+        }
+    }
 }
 
 pub static STATE_MANAGER_MUTEX: Mutex<CriticalSectionRawMutex, ProgramState> = Mutex::new(ProgramState {
     config: None,
+    screen_index: 0,
     server_side_image: Vec::new(),
 });

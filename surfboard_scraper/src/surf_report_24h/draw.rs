@@ -23,7 +23,7 @@ const TIDE_CHART_Y_TOP: i32 = 100;
 const TIDE_CHART_Y_BOTTOM: i32 = 220;
 const TIDE_Y_HEIGHT: i32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
 
-use crate::surf_report_24h::surf_report::SurfReport24H;
+use crate::surf_report_24h::data::SurfReport24HData;
 use crate::surfline_types::weather::WeatherCondition;
 use crate::surfline_types::wind::WindDirectionType;
 
@@ -33,7 +33,7 @@ fn get_local_time_from_unix(unix_timestamp: i64, offset: i32) -> NaiveDateTime {
     offset.from_local_datetime(&time).unwrap().naive_utc()
 }
 
-pub fn draw<D, E>(target: &mut D, surf_report: &SurfReport24H) -> Result<(), E>
+pub fn draw<D, E>(target: &mut D, surf_report: &SurfReport24HData) -> Result<(), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
@@ -47,7 +47,7 @@ where
     Ok(())
 }
 
-pub fn draw_tides<D, E>(target: &mut D, surf_report: &SurfReport24H) -> Result<(i64, i64), E>
+pub fn draw_tides<D, E>(target: &mut D, surf_report: &SurfReport24HData) -> Result<(i64, i64), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
@@ -154,7 +154,7 @@ where
 
 pub fn draw_wave_height<D, E>(
     target: &mut D,
-    surf_report: &SurfReport24H,
+    surf_report: &SurfReport24HData,
     min_time: i64,
     max_time: i64,
     y: i32,
@@ -189,7 +189,7 @@ where
 
 pub fn draw_wind<D, E>(
     target: &mut D,
-    surf_report: &SurfReport24H,
+    surf_report: &SurfReport24HData,
     min_time: i64,
     max_time: i64,
     y: i32,
@@ -219,7 +219,7 @@ where
             text_style,
         )
         .draw(target)?;
-        const ARROW_OFFSET_X: i32 = 40;
+        const ARROW_OFFSET_X: i32 = 45;
         if data.direction_type == WindDirectionType::CrossShore {
             let l = Line::with_delta(Point::new(x_axis + ARROW_OFFSET_X, y - 2), Point::new(10, 0));
             l.into_styled(PrimitiveStyle::with_stroke(TriColor::Black, 1))
@@ -263,7 +263,7 @@ where
 
 pub fn draw_weather<D, E>(
     target: &mut D,
-    surf_report: &SurfReport24H,
+    surf_report: &SurfReport24HData,
     min_time: i64,
     max_time: i64,
     y: i32,
@@ -347,7 +347,7 @@ where
     }
 }
 
-pub fn draw_headings<D, E>(target: &mut D, surf_report: &SurfReport24H, y: i32) -> Result<(), E>
+pub fn draw_headings<D, E>(target: &mut D, surf_report: &SurfReport24HData, y: i32) -> Result<(), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
