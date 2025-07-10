@@ -6,12 +6,7 @@ use crate::{
         drawing::DisplayAction,
         event::{send_event, wait, Events, WifiAction},
     },
-    task::{
-        display::display_update,
-        power::POWER_DOWN_SIGNAL,
-        state::{self, STATE_MANAGER_MUTEX},
-        wifi::retrieve_data,
-    },
+    task::{display::display_update, power::POWER_DOWN_SIGNAL, state::STATE_MANAGER_MUTEX, wifi::retrieve_data},
 };
 
 /// Main coordination task that implements the system's event loop

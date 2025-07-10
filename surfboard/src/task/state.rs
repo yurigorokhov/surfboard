@@ -21,7 +21,7 @@ const SERVER_SIDE_IMAGE_BYTES: usize = 1024 * 24;
 pub struct ProgramState {
     pub config: Option<Configuration>,
     pub screen_index: usize,
-    pub server_side_image: Vec<u8, SERVER_SIDE_IMAGE_BYTES>,
+    buffer: Vec<u8, SERVER_SIDE_IMAGE_BYTES>,
 }
 
 impl ProgramState {
@@ -39,10 +39,18 @@ impl ProgramState {
             }
         }
     }
+
+    pub fn get_mut_buffer(&mut self) -> &mut Vec<u8, SERVER_SIDE_IMAGE_BYTES> {
+        &mut self.buffer
+    }
+
+    pub fn get_buffer(&self) -> &Vec<u8, SERVER_SIDE_IMAGE_BYTES> {
+        &self.buffer
+    }
 }
 
 pub static STATE_MANAGER_MUTEX: Mutex<CriticalSectionRawMutex, ProgramState> = Mutex::new(ProgramState {
     config: None,
     screen_index: 0,
-    server_side_image: Vec::new(),
+    buffer: Vec::new(),
 });

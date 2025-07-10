@@ -183,9 +183,9 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     let http_provider = HttpClientProvider::new(*stack);
 
                     let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-                    state_guard.server_side_image.clear();
+                    state_guard.get_mut_buffer().clear();
                     match http_provider
-                        .get(screen_configuration.url.as_str(), &mut state_guard.server_side_image)
+                        .get(screen_configuration.url.as_str(), &mut state_guard.get_mut_buffer())
                         .await
                     {
                         Some(_) => {

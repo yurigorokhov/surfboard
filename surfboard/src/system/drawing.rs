@@ -43,7 +43,7 @@ impl DisplayAction {
             }
             DisplayAction::DrawImage => {
                 let zero = Point::zero();
-                let image = Qoi::new(&state.server_side_image).expect("Failed to parse image");
+                let image = Qoi::new(&state.get_buffer()).expect("Failed to parse image");
                 let pixels = image
                     .pixels()
                     .enumerate()
