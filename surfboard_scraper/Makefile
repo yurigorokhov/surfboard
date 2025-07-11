@@ -19,7 +19,7 @@ package: build
 	cp deploy/surfboard-scraper.service ${TMP_DIR}/surfboard_scraper/
 	cp deploy/install.sh ${TMP_DIR}/surfboard_scraper/
 	cp deploy/config.json ${TMP_DIR}/surfboard_scraper/deploy/
-	cp deploy/photo.jpeg ${TMP_DIR}/surfboard_scraper/deploy/
+	cp deploy/photo.png ${TMP_DIR}/surfboard_scraper/deploy/
 	cp target/armv7-unknown-linux-musleabihf/release/surfboard_scraper ${TMP_DIR}/surfboard_scraper/
 	tar --no-xattrs -czvf surfboard_scraper.tar.gz -C ${TMP_DIR} .
 	rm -rf ${TMP_DIR}
