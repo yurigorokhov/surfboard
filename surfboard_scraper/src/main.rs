@@ -1,5 +1,7 @@
 mod http;
 mod image_data;
+mod photo;
+mod screen;
 mod surf_report_24h;
 mod surfline_types;
 mod util;
@@ -14,7 +16,7 @@ use tokio::{
     time::{Duration, sleep},
 };
 
-use crate::{surf_report_24h::data::SurfReport24HData, util::parse_s3_url};
+use crate::util::parse_s3_url;
 
 pub async fn upload_object(
     client: &aws_sdk_s3::Client,
@@ -69,17 +71,29 @@ async fn main() -> Result<()> {
         // read config file
         let config: Configuration = serde_json::from_str(fs::read_to_string(CONFIG_PATH).await?.as_str())?;
         for screen in config.screens {
-            let params = SurfReport24HData::parse_params(&screen.params)?;
             let mut bytes: Vec<u8> = Vec::new();
-            SurfReport24HData::new_from_params(&params)
-                .await?
-                .draw_to_qoi(&mut Cursor::new(&mut bytes))?;
+            screen.draw_to_qoi(&mut Cursor::new(&mut bytes)).await?;
 
-            // upload surf report image
+            // upload screen image
             match parse_s3_url(&screen.url) {
                 Ok((bucket, path)) => {
                     upload_bytes(&client, &bucket, &bytes, &path).await?;
                     println!("Uploaded: {} bytes: {}", screen.url, &bytes.len());
+                }
+                Err(e) => {
+                    println!("Error: {:#?}", e);
+                }
+            }
+        }
+
+        // upload screensaver
+        if let Some(screen_saver) = config.screen_saver {
+            let mut bytes: Vec<u8> = Vec::new();
+            screen_saver.draw_to_qoi(&mut Cursor::new(&mut bytes)).await?;
+            match parse_s3_url(&screen_saver.url) {
+                Ok((bucket, path)) => {
+                    upload_bytes(&client, &bucket, &bytes, &path).await?;
+                    println!("Uploaded: {} bytes: {}", screen_saver.url, &bytes.len());
                 }
                 Err(e) => {
                     println!("Error: {:#?}", e);

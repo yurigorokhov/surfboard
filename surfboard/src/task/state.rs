@@ -3,12 +3,10 @@ use embassy_sync::mutex::Mutex;
 use heapless::{LinearMap, String, Vec};
 use serde::{Deserialize, Serialize};
 
-const NUM_SCREEN_CONFIGURATIONS: usize = 5;
-const NUM_SCREEN_BUFFERS: usize = 2;
-
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Configuration {
     pub screens: Vec<ScreenConfiguration, NUM_SCREEN_CONFIGURATIONS>,
+    pub screen_saver: Option<ScreenConfiguration>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -16,7 +14,10 @@ pub struct ScreenConfiguration {
     pub url: String<128>,
 }
 
-const SERVER_SIDE_IMAGE_BYTES: usize = 1024 * 24;
+const NUM_SCREEN_CONFIGURATIONS: usize = 5;
+const NUM_SCREEN_BUFFERS: usize = 2;
+pub const SERVER_SIDE_IMAGE_BYTES: usize = 1024 * 25;
+pub const SCREEN_SAVER_SCREEN_IDX: usize = 127;
 
 #[derive(Default)]
 pub struct ProgramState {
@@ -43,6 +44,10 @@ impl ProgramState {
     }
 
     pub fn move_to_next_screen(&mut self) {
+        // special shutdown (screensaver) index
+        if self.screen_index == SCREEN_SAVER_SCREEN_IDX {
+            return;
+        }
         if let Some(idx) = self.next_screen_idx() {
             self.screen_index = idx;
         } else {

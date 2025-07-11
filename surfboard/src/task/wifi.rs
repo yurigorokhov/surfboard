@@ -17,20 +17,20 @@ use static_cell::StaticCell;
 #[cfg(feature = "fake_responses")]
 use crate::fake::fake_http::FakeHttpClient;
 use crate::random::RngWrapper;
-use crate::system::event::{send_error, send_event, Events, WifiAction};
+use crate::system::event::{send_error, send_event, Events, WifiCommand};
 use crate::system::net::{HttpClientProvider, HttpDataProvider, HttpJsonDataProvider};
 use crate::system::resources::{Irqs, WifiResources};
 use crate::task::state::{Configuration, STATE_MANAGER_MUTEX};
 
-pub static DATA_REQUEST_CHANNEL: Channel<CriticalSectionRawMutex, WifiAction, 4> = Channel::new();
+pub static DATA_REQUEST_CHANNEL: Channel<CriticalSectionRawMutex, WifiCommand, 4> = Channel::new();
 
 /// Requests a display update with the specified action
-pub async fn retrieve_data(display_action: WifiAction) {
+pub async fn wifi_command(display_action: WifiCommand) {
     DATA_REQUEST_CHANNEL.send(display_action).await;
 }
 
 /// Blocks until next update request, returns the requested display action
-async fn wait() -> WifiAction {
+async fn wait() -> WifiCommand {
     DATA_REQUEST_CHANNEL.receive().await
 }
 
@@ -150,7 +150,7 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
             control.gpio_set(0, true).await;
 
             match data_retrieval_action {
-                WifiAction::LoadConfiguration => {
+                WifiCommand::LoadConfiguration => {
                     control
                         .set_power_management(cyw43::PowerManagementMode::Performance)
                         .await;
@@ -171,7 +171,7 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     }
                     send_event(Events::ConfigurationLoaded).await;
                 }
-                WifiAction::LoadScreen(screen_idx, screen_configuration) => {
+                WifiCommand::LoadScreen(screen_idx, screen_configuration) => {
                     control
                         .set_power_management(cyw43::PowerManagementMode::Performance)
                         .await;
@@ -185,18 +185,17 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
 
                     // get mutable buffer to store screen data into
-                    let buffer = state_guard.get_mut_buffer_for_screen(screen_idx).unwrap();
-
-                    match http_provider.get(screen_configuration.url.as_str(), buffer).await {
-                        Some(_) => {
+                    if let Some(buffer) = state_guard.get_mut_buffer_for_screen(screen_idx) {
+                        if let Some(_) = http_provider.get(screen_configuration.url.as_str(), buffer).await {
                             send_event(Events::ScreenLoaded(screen_idx)).await;
-                        }
-                        None => {
+                        } else {
                             send_error("Failed to fetch screen").await;
                         }
+                    } else {
+                        send_error("Failed to get buffer for screen").await;
                     }
                 }
-                WifiAction::PowerOffWifi => {
+                WifiCommand::PowerOffWifi => {
                     break;
                 }
             }

@@ -41,13 +41,14 @@ pub enum Events {
     WifiOff,
     DisplayOff,
     ConfigurationLoaded,
+    ScreenDrawn(usize),
     ScreenLoaded(usize),
     OrchestratorTimeout,
     PowerButtonPressed,
 }
 
 #[derive(Debug, Clone)]
-pub enum WifiAction {
+pub enum WifiCommand {
     LoadConfiguration,
     LoadScreen(usize, ScreenConfiguration),
     PowerOffWifi,

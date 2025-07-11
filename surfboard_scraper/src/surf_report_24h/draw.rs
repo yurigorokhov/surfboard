@@ -311,7 +311,11 @@ where
                     target,
                 );
             }
-            WeatherCondition::NightBriefShowers | WeatherCondition::BriefShowers => {
+            WeatherCondition::NightBriefShowers
+            | WeatherCondition::BriefShowers
+            | WeatherCondition::BriefShowersPossible
+            | WeatherCondition::NightDrizzle
+            | WeatherCondition::Drizzle => {
                 draw_binary_image_on_tricolor(
                     &ImageRaw::<BinaryColor>::new(SHOWERS, 32),
                     Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),

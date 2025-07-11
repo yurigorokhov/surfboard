@@ -1,4 +1,4 @@
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use chrono::prelude::*;
 use core::fmt::Debug;
 use embedded_graphics::prelude::*;
@@ -15,6 +15,7 @@ const MEASUREMENTS_WIND: usize = 10;
 const MEASUREMENTS_WEATHER: usize = 10;
 
 use crate::{
+    screen::Screen,
     surf_report_24h::draw::draw,
     surfline_types::{
         conditions::{ConditionsMeasurement, ConditionsResult, fetch_conditions},
@@ -42,26 +43,49 @@ pub struct SurfReport24HData {
     pub spot_details: SpotDetails,
 }
 
-impl SurfReport24HData {
-    pub async fn new_from_params(params: &SurfReport24HDataParams) -> Result<Self> {
+impl Screen<SurfReport24HDataParams> for SurfReport24HData {
+    async fn from_params(params: &SurfReport24HDataParams) -> Result<Box<Self>> {
         let spot_id = params.spot_id.as_str();
-        Ok(SurfReport24HData::new_from_results(
+        Ok(Box::new(SurfReport24HData::new_from_results(
             fetch_waves(spot_id).await?,
             fetch_tides(spot_id).await?,
             fetch_weather(spot_id).await?,
             fetch_wind(spot_id).await?,
             fetch_conditions(spot_id).await?,
             fetch_spot_details(spot_id).await?,
-        ))
+        )))
     }
 
-    pub fn parse_params(params: &HashMap<String, Value>) -> Result<SurfReport24HDataParams> {
+    fn draw_to_qoi<W>(&self, writer: &mut W) -> Result<()>
+    where
+        W: std::io::Write + std::io::Seek,
+    {
+        let mut display = SimulatorDisplay::<TriColor>::new(Size::new(800, 480));
+        self.draw(&mut display)?;
+        let output_settings = OutputSettingsBuilder::new().scale(1).build();
+        let output_image = display.to_rgb_output_image(&output_settings);
+        let image_buffer = output_image.as_image_buffer();
+        image_buffer.write_to(writer, image::ImageFormat::Qoi).unwrap();
+        Ok(())
+    }
+
+    fn parse_params(params: &HashMap<String, Value>) -> Result<SurfReport24HDataParams> {
         let spot_id = params.get("spot_id").unwrap().as_str().unwrap();
         Ok(SurfReport24HDataParams {
             spot_id: spot_id.into(),
         })
     }
 
+    fn draw<D, E>(&self, target: &mut D) -> Result<(), E>
+    where
+        E: Debug,
+        D: DrawTarget<Color = TriColor, Error = E>,
+    {
+        draw(target, self)
+    }
+}
+
+impl SurfReport24HData {
     pub fn new_from_results(
         wave_result: WaveResult,
         tide_result: TideResult,
@@ -117,26 +141,5 @@ impl SurfReport24HData {
         let offset = FixedOffset::west_opt(-7 * 3600).unwrap();
         let local_time = self.parse_timestamp_utc()?.naive_local();
         Ok(offset.from_local_datetime(&local_time).unwrap().naive_utc())
-    }
-
-    pub fn draw<D, E>(&self, target: &mut D) -> Result<(), E>
-    where
-        E: Debug,
-        D: DrawTarget<Color = TriColor, Error = E>,
-    {
-        draw(target, self)
-    }
-
-    pub fn draw_to_qoi<W>(&self, writer: &mut W) -> Result<()>
-    where
-        W: std::io::Write + std::io::Seek,
-    {
-        let mut display = SimulatorDisplay::<TriColor>::new(Size::new(800, 480));
-        self.draw(&mut display)?;
-        let output_settings = OutputSettingsBuilder::new().scale(1).build();
-        let output_image = display.to_rgb_output_image(&output_settings);
-        let image_buffer = output_image.as_image_buffer();
-        image_buffer.write_to(writer, image::ImageFormat::Qoi).unwrap();
-        Ok(())
     }
 }

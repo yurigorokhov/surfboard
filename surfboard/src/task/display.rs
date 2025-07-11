@@ -2,7 +2,7 @@ use core::cell::RefCell;
 
 use crate::{
     system::{
-        drawing::DisplayAction,
+        drawing::DisplayCommand,
         event::{send_event, Events},
         resources::ScreenResources,
     },
@@ -25,15 +25,15 @@ use epd_waveshare::epd7in5_v2::Epd7in5;
 use epd_waveshare::prelude::WaveshareDisplay;
 use static_cell::StaticCell;
 
-pub static DISPLAY_CHANNEL: Channel<CriticalSectionRawMutex, DisplayAction, 4> = Channel::new();
+pub static DISPLAY_CHANNEL: Channel<CriticalSectionRawMutex, DisplayCommand, 4> = Channel::new();
 
 /// Requests a display update with the specified action
-pub async fn display_update(display_action: DisplayAction) {
+pub async fn display_command(display_action: DisplayCommand) {
     DISPLAY_CHANNEL.send(display_action).await;
 }
 
 /// Blocks until next update request, returns the requested display action
-async fn wait() -> DisplayAction {
+async fn wait() -> DisplayCommand {
     DISPLAY_CHANNEL.receive().await
 }
 
@@ -118,7 +118,7 @@ pub async fn start(r: ScreenResources) {
         // Wait for the next display update request and clear the display
         let display_action = wait().await;
 
-        if display_action == DisplayAction::DisplayPowerOff {
+        if display_action == DisplayCommand::DisplayPowerOff {
             display.power_off();
             send_event(Events::DisplayOff).await;
             break;
@@ -133,14 +133,14 @@ pub async fn start(r: ScreenResources) {
         }
 
         display.draw(canvas.buffer()).expect("Failed to draw on screen");
+        display.sleep().expect("Failed to put screen to sleep");
 
         // after drawing an image, let's clear out the buffer so it's ready to use again
-        if let DisplayAction::DrawImage(screen_idx) = &display_action {
+        if let DisplayCommand::DrawImage(screen_idx) = display_action {
             let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-            state_guard.forget_screen_idx(*screen_idx);
+            state_guard.forget_screen_idx(screen_idx);
+            send_event(Events::ScreenDrawn(screen_idx)).await;
         }
-
-        display.sleep().expect("Failed to put screen to sleep");
     }
 }
 

@@ -11,12 +11,14 @@ use reqwless::{
 };
 use serde::de::DeserializeOwned;
 
+use crate::{system::event::send_error, task::state::SERVER_SIDE_IMAGE_BYTES};
+
 pub trait HttpJsonDataProvider<DataType: DeserializeOwned> {
     async fn get_as_json<'a>(&'a self, url: &'a str) -> Option<DataType>;
 }
 
 pub trait HttpDataProvider {
-    async fn get<'a>(&'a self, url: &'a str, target: &mut Vec<u8, 24576>) -> Option<()>;
+    async fn get<'a>(&'a self, url: &'a str, target: &mut Vec<u8, SERVER_SIDE_IMAGE_BYTES>) -> Option<()>;
 }
 
 pub struct HttpClientProvider {
@@ -30,12 +32,12 @@ impl HttpClientProvider {
 }
 
 impl HttpDataProvider for HttpClientProvider {
-    async fn get<'a>(&'a self, url: &'a str, target: &mut Vec<u8, 24576>) -> Option<()> {
+    async fn get<'a>(&'a self, url: &'a str, target: &mut Vec<u8, SERVER_SIDE_IMAGE_BYTES>) -> Option<()> {
         let seed: u64 = 1337;
 
-        let mut tls_read_buffer = [0; 4096 * 3];
-        let mut tls_write_buffer = [0; 4096 * 3];
-        let mut buffer = [0; 24576];
+        let mut tls_read_buffer = [0; 4096 * 4];
+        let mut tls_write_buffer = [0; 4096 * 4];
+        let mut buffer = [0; SERVER_SIDE_IMAGE_BYTES];
 
         let client_state = TcpClientState::<1, 1024, 1024>::new();
         let tcp_client = TcpClient::new(self.stack, &client_state);
@@ -62,12 +64,8 @@ impl HttpDataProvider for HttpClientProvider {
         }?;
         debug!("response code: {}", response.status.0);
 
-        let body = response
-            .body()
-            .read_to_end()
-            .await
-            .expect("Failed to get response body");
-        target.extend_from_slice(body).unwrap();
+        let body = response.body().read_to_end().await.ok()?;
+        target.extend_from_slice(body).ok()?;
         Some(())
     }
 }
@@ -80,9 +78,9 @@ where
     async fn get_as_json<'a>(&'a self, url: &'a str) -> Option<DataType> {
         let seed: u64 = 1337;
 
-        let mut tls_read_buffer = [0; 4096 * 3];
-        let mut tls_write_buffer = [0; 4096 * 3];
-        let mut buffer = [0; 4096 * 3];
+        let mut tls_read_buffer = [0; 4096 * 2];
+        let mut tls_write_buffer = [0; 4096 * 2];
+        let mut buffer = [0; 4096];
 
         let client_state = TcpClientState::<1, 1024, 1024>::new();
         let tcp_client = TcpClient::new(self.stack, &client_state);

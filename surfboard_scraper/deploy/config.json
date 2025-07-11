@@ -24,5 +24,13 @@
             },
             "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_5842041f4e65fad6a7708981.qoi"
         }
-    ]
+    ],
+    "screen_saver": {
+        "id": "screensaver-photo",
+        "key": "Photo",
+        "params": {
+            "path": "deploy/photo.png"
+        },
+        "url": "https://yurig-public.s3.us-east-1.amazonaws.com/screensaver-photo.qoi"
+    }
 }

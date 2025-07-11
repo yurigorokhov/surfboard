@@ -26,6 +26,9 @@ pub enum WeatherCondition {
     BriefShowers,
     NightBriefShowers,
     NightMist,
+    BriefShowersPossible,
+    NightDrizzle,
+    Drizzle,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

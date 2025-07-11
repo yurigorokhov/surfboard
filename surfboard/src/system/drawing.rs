@@ -14,20 +14,20 @@ use tinyqoi::Qoi;
 use crate::task::state::ProgramState;
 
 #[derive(PartialEq)]
-pub enum DisplayAction {
+pub enum DisplayCommand {
     ShowStatusText(String<30>, i32),
     DrawImage(usize),
     DisplayPowerOff,
 }
 
-impl DisplayAction {
+impl DisplayCommand {
     pub fn draw<D, E>(&self, target: &mut D, state: &ProgramState) -> Result<(), E>
     where
         E: Debug,
         D: DrawTarget<Color = Color, Error = E>,
     {
         match self {
-            DisplayAction::ShowStatusText(text, line_number) => {
+            DisplayCommand::ShowStatusText(text, line_number) => {
                 let text_style = TextStyleBuilder::new()
                     .alignment(Alignment::Left)
                     .line_height(LineHeight::Percent(150))
@@ -41,7 +41,7 @@ impl DisplayAction {
                 .draw(target)?;
                 Ok(())
             }
-            DisplayAction::DrawImage(screen_idx) => {
+            DisplayCommand::DrawImage(screen_idx) => {
                 let zero = Point::zero();
                 let image = Qoi::new(state.get_buffer_for_screen(*screen_idx).unwrap()).expect("Failed to parse image");
                 let pixels = image
@@ -51,7 +51,7 @@ impl DisplayAction {
                 let _ = target.draw_iter(pixels);
                 Ok(())
             }
-            DisplayAction::DisplayPowerOff => Ok(()),
+            DisplayCommand::DisplayPowerOff => Ok(()),
         }
     }
 }
