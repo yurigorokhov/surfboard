@@ -3,34 +3,33 @@ use core::fmt::Debug;
 use embedded_graphics::prelude::*;
 use embedded_graphics_simulator::{OutputSettingsBuilder, SimulatorDisplay};
 use epd_waveshare::color::TriColor;
-use image::imageops::colorops::dither;
-use image::imageops::{self, BiLevel, FilterType};
+use image::imageops::{self, FilterType};
 use image::{Luma, open};
 use serde::{Deserialize, Serialize};
 
 use crate::screen::Screen;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PhotoScreenParams {
+pub struct ScreenSaverParams {
     path: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct PhotoScreen {
+pub struct ScreenSaverScreen {
     path: String,
 }
 
-impl Screen<PhotoScreenParams> for PhotoScreen {
+impl Screen<ScreenSaverParams> for ScreenSaverScreen {
     fn parse_params(
         params: &std::collections::HashMap<String, serde_json::Value>,
-    ) -> anyhow::Result<PhotoScreenParams> {
-        Ok(PhotoScreenParams {
+    ) -> anyhow::Result<ScreenSaverParams> {
+        Ok(ScreenSaverParams {
             path: params.get("path").unwrap().as_str().unwrap().to_string(),
         })
     }
 
-    async fn from_params(params: &PhotoScreenParams) -> Result<Box<Self>> {
-        Ok(Box::new(PhotoScreen {
+    async fn from_params(params: &ScreenSaverParams) -> Result<Box<Self>> {
+        Ok(Box::new(ScreenSaverScreen {
             path: params.path.clone(),
         }))
     }
@@ -55,9 +54,9 @@ impl Screen<PhotoScreenParams> for PhotoScreen {
     {
         fn to_tricolor(color: &Luma<u8>) -> TriColor {
             if color[0] > 128 {
-                TriColor::Black
-            } else {
                 TriColor::White
+            } else {
+                TriColor::Black
             }
         }
 

@@ -1,7 +1,7 @@
 mod http;
 mod image_data;
-mod photo;
 mod screen;
+mod screensaver;
 mod surf_report_24h;
 mod surfline_types;
 mod util;

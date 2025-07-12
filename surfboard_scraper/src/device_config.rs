@@ -8,8 +8,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::{
-    photo::PhotoScreen,
     screen::{Screen, ScreenIdentifier},
+    screensaver::ScreenSaverScreen,
     surf_report_24h::data::SurfReport24HData,
 };
 
@@ -38,9 +38,9 @@ impl ScreenConfiguration {
                 SurfReport24HData::from_params(&params).await?.draw_to_qoi(writer)?;
                 Ok(())
             }
-            ScreenIdentifier::Photo => {
-                let params = PhotoScreen::parse_params(&self.params)?;
-                PhotoScreen::from_params(&params).await?.draw_to_qoi(writer)?;
+            ScreenIdentifier::ScreenSaver => {
+                let params = ScreenSaverScreen::parse_params(&self.params)?;
+                ScreenSaverScreen::from_params(&params).await?.draw_to_qoi(writer)?;
                 Ok(())
             }
         }
@@ -53,9 +53,9 @@ impl ScreenConfiguration {
                 let params = SurfReport24HData::parse_params(&self.params)?;
                 SurfReport24HData::from_params(&params).await?.draw(&mut display)?;
             }
-            ScreenIdentifier::Photo => {
-                let params = PhotoScreen::parse_params(&self.params)?;
-                PhotoScreen::from_params(&params).await?.draw(&mut display)?;
+            ScreenIdentifier::ScreenSaver => {
+                let params = ScreenSaverScreen::parse_params(&self.params)?;
+                ScreenSaverScreen::from_params(&params).await?.draw(&mut display)?;
             }
         }
         let output_settings = OutputSettingsBuilder::new().scale(1).build();

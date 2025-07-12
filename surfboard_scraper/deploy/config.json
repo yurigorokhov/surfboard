@@ -26,8 +26,8 @@
         }
     ],
     "screen_saver": {
-        "id": "screensaver-photo",
-        "key": "Photo",
+        "id": "screensaver",
+        "key": "ScreenSaver",
         "params": {
             "path": "deploy/photo.png"
         },
