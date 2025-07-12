@@ -84,7 +84,14 @@ async fn process_event<'a>(event: Events) {
                 }
             }
         }
-        Events::Error(msg) => display_command(DisplayCommand::ShowStatusText(msg, 1)).await,
+        Events::Error(msg) => {
+            display_command(DisplayCommand::ShowStatusText(msg, 1)).await;
+
+            // wait 20 seconds for display to update and begin shutdown sequence
+            Timer::after_secs(20).await;
+
+            wifi_command(WifiCommand::PowerOffWifi).await
+        }
         Events::ScreenLoaded(screen_idx) => {
             let state_guard = STATE_MANAGER_MUTEX.lock().await;
             if state_guard.screen_index == screen_idx {
