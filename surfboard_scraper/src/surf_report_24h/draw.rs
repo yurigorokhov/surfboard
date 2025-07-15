@@ -304,7 +304,7 @@ where
                     target,
                 );
             }
-            WeatherCondition::Mist | WeatherCondition::NightMist => {
+            WeatherCondition::Mist | WeatherCondition::NightMist | WeatherCondition::NightFog => {
                 draw_binary_image_on_tricolor(
                     &ImageRaw::<BinaryColor>::new(MIST, 32),
                     Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),

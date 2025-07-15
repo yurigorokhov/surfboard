@@ -18,6 +18,7 @@ pub struct WeatherData {
 pub enum WeatherCondition {
     NightMostlyCloudy,
     NightClear,
+    NightFog,
     MostlyCloudy,
     MostlyClear,
     Mist,
