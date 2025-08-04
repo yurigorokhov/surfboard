@@ -16,24 +16,24 @@ const MEASUREMENTS_WEATHER: usize = 10;
 
 use crate::{
     screen::Screen,
-    surf_report_24h::draw::draw,
+    surf_report_week::draw::draw,
     surfline_types::{
         conditions::{ConditionsMeasurement, ConditionsResult, fetch_conditions},
         spot_details::{SpotDetails, SpotDetailsResult, fetch_spot_details},
         tide::{TideMeasurement, TideResult, fetch_tides},
-        wave::{WaveMeasurement, WaveResult, fetch_waves},
+        wave::{FetchWavesParams, WaveMeasurement, WaveResult, fetch_waves},
         weather::{WeatherMeasurement, WeatherResult, fetch_weather},
         wind::{WindMeasurement, WindResult, fetch_wind},
     },
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SurfReport24HDataParams {
+pub struct SurfReportWeekParams {
     spot_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SurfReport24HData {
+pub struct SurfReportWeekData {
     pub last_updated_utc: i64,
     pub waves: Vec<WaveMeasurement>,
     pub tides: Vec<TideMeasurement>,
@@ -43,11 +43,18 @@ pub struct SurfReport24HData {
     pub spot_details: SpotDetails,
 }
 
-impl Screen<SurfReport24HDataParams> for SurfReport24HData {
-    async fn from_params(params: &SurfReport24HDataParams) -> Result<Box<Self>> {
+impl Screen<SurfReportWeekParams> for SurfReportWeekData {
+    async fn from_params(params: &SurfReportWeekParams) -> Result<Box<Self>> {
         let spot_id = params.spot_id.as_str();
-        Ok(Box::new(SurfReport24HData::new_from_results(
-            fetch_waves(spot_id, None).await?,
+        Ok(Box::new(SurfReportWeekData::new_from_results(
+            fetch_waves(
+                spot_id,
+                Some(FetchWavesParams {
+                    days: 7,
+                    interval_hours: 6,
+                }),
+            )
+            .await?,
             fetch_tides(spot_id).await?,
             fetch_weather(spot_id).await?,
             fetch_wind(spot_id).await?,
@@ -69,9 +76,9 @@ impl Screen<SurfReport24HDataParams> for SurfReport24HData {
         Ok(())
     }
 
-    fn parse_params(params: &HashMap<String, Value>) -> Result<SurfReport24HDataParams> {
+    fn parse_params(params: &HashMap<String, Value>) -> Result<SurfReportWeekParams> {
         let spot_id = params.get("spot_id").unwrap().as_str().unwrap();
-        Ok(SurfReport24HDataParams {
+        Ok(SurfReportWeekParams {
             spot_id: spot_id.into(),
         })
     }
@@ -85,7 +92,7 @@ impl Screen<SurfReport24HDataParams> for SurfReport24HData {
     }
 }
 
-impl SurfReport24HData {
+impl SurfReportWeekData {
     pub fn new_from_results(
         wave_result: WaveResult,
         tide_result: TideResult,
@@ -95,7 +102,7 @@ impl SurfReport24HData {
         spot_details_result: SpotDetailsResult,
     ) -> Self {
         let now = Utc::now();
-        SurfReport24HData {
+        SurfReportWeekData {
             last_updated_utc: now.timestamp(),
             waves: wave_result
                 .data

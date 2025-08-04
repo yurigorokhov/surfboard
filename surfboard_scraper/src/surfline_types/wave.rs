@@ -28,10 +28,25 @@ pub struct WaveMeasurementSurf {
     pub human_relation: String,
 }
 
-pub async fn fetch_waves(spot_id: &str) -> Result<WaveResult> {
+pub struct FetchWavesParams {
+    pub days: u32,
+    pub interval_hours: u32,
+}
+
+impl Default for FetchWavesParams {
+    fn default() -> Self {
+        Self {
+            days: 2,
+            interval_hours: 1,
+        }
+    }
+}
+
+pub async fn fetch_waves(spot_id: &str, params: Option<FetchWavesParams>) -> Result<WaveResult> {
+    let params = params.unwrap_or_default();
     let url = format!(
-        "https://services.surfline.com/kbyg/spots/forecasts/wave?spotId={}&days=2&intervalHours=1",
-        spot_id
+        "https://services.surfline.com/kbyg/spots/forecasts/wave?spotId={}&days={}&intervalHours={}",
+        spot_id, params.days, params.interval_hours,
     );
     fetch(url.as_str()).await
 }
