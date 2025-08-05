@@ -9,7 +9,7 @@ use core::fmt::Debug;
 use embedded_graphics::image::ImageRaw;
 use embedded_graphics::mono_font::ascii::FONT_9X15_BOLD;
 use embedded_graphics::pixelcolor::BinaryColor;
-use embedded_graphics::{mono_font::MonoTextStyle, prelude::*, text::Text};
+use embedded_graphics::{mono_font::MonoTextStyle, prelude::*, primitives::{Line, PrimitiveStyle}, text::Text};
 use epd_waveshare::color::TriColor;
 use std::collections::HashMap;
 
@@ -18,10 +18,18 @@ const CHART_X_LEFT: i32 = 40;
 const CHART_X_RIGHT: i32 = 760;
 const CHART_WIDTH: i32 = CHART_X_RIGHT - CHART_X_LEFT;
 const COLUMN_WIDTH: i32 = CHART_WIDTH / 7;
-const DAY_LABEL_Y: i32 = 120;
-const WAVE_DATA_Y: i32 = 180;
-const WEATHER_DATA_Y: i32 = 240;
-const WIND_DATA_Y: i32 = 300;
+
+// Better vertical centering - screen is 480px tall, footer at ~470
+// Content area: ~60px from top, ~120px from bottom = 300px content area
+// Balanced spacing with good visual hierarchy
+const DAY_LABEL_Y: i32 = 140;        // Day names and dates
+const WAVE_DATA_Y: i32 = 210;        // Wave height data  
+const WEATHER_DATA_Y: i32 = 280;     // Weather icons
+const WIND_DATA_Y: i32 = 350;        // Wind speed data
+
+// Separator styling constants - span the main content area
+const SEPARATOR_TOP_Y: i32 = 110;
+const SEPARATOR_BOTTOM_Y: i32 = 370;
 
 use crate::surf_report_week::data::SurfReportWeekData;
 
@@ -30,6 +38,9 @@ where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
 {
+    // Draw day separators first (as background elements)
+    draw_day_separators(target)?;
+
     // Draw day column headers
     draw_day_headers(target, surf_report)?;
 
@@ -272,6 +283,42 @@ where
     D: DrawTarget<Color = TriColor, Error = E>,
 {
     // This function is kept for compatibility but is replaced by draw_daily_weather
+    Ok(())
+}
+
+pub fn draw_day_separators<D, E>(target: &mut D) -> Result<(), E>
+where
+    E: Debug,
+    D: DrawTarget<Color = TriColor, Error = E>,
+{
+    // Create a thin line style for subtle separators
+    let thin_line_style = PrimitiveStyle::with_stroke(TriColor::Black, 1);
+    
+    // Draw vertical separators between day columns (but not after the last column)
+    for day_index in 1..7 {
+        let x_pos = CHART_X_LEFT + (day_index as i32 * COLUMN_WIDTH);
+        
+        // Draw main vertical separator line
+        Line::new(
+            Point::new(x_pos, SEPARATOR_TOP_Y),
+            Point::new(x_pos, SEPARATOR_BOTTOM_Y),
+        )
+        .into_styled(thin_line_style)
+        .draw(target)?;
+        
+        // Add small decorative elements at key intersections
+        // Top accent dot
+        target.draw_iter([Pixel(Point::new(x_pos, SEPARATOR_TOP_Y - 5), TriColor::Black)])?;
+        
+        // Middle accent dots at each data row
+        target.draw_iter([Pixel(Point::new(x_pos, WAVE_DATA_Y), TriColor::Black)])?;
+        target.draw_iter([Pixel(Point::new(x_pos, WEATHER_DATA_Y), TriColor::Black)])?;
+        target.draw_iter([Pixel(Point::new(x_pos, WIND_DATA_Y), TriColor::Black)])?;
+        
+        // Bottom accent dot
+        target.draw_iter([Pixel(Point::new(x_pos, SEPARATOR_BOTTOM_Y + 5), TriColor::Black)])?;
+    }
+    
     Ok(())
 }
 

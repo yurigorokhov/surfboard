@@ -3,6 +3,7 @@ use core::fmt::Debug;
 use core::fmt::Write;
 use embedded_graphics::image::GetPixel;
 use embedded_graphics::image::ImageRaw;
+use embedded_graphics::mono_font::ascii::FONT_6X10;
 use embedded_graphics::mono_font::ascii::{FONT_8X13, FONT_9X15};
 use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
 use embedded_graphics::pixelcolor::BinaryColor;
@@ -88,7 +89,7 @@ where
                 target,
             );
         }
-        WeatherCondition::NightMostlyCloudy | WeatherCondition::MostlyCloudy => {
+        WeatherCondition::NightMostlyCloudy | WeatherCondition::MostlyCloudy | WeatherCondition::NightCloudy => {
             draw_binary_image_on_tricolor(
                 &ImageRaw::<BinaryColor>::new(MOSTLY_CLOUDY, 32),
                 Point::new(position.x - 16, position.y - 16),
@@ -112,6 +113,16 @@ where
                 Point::new(position.x - 16, position.y - 16),
                 target,
             );
+        }
+        WeatherCondition::Unknown(condition_str) => {
+            // Display the unknown condition text instead of an icon
+            let _ = Text::with_text_style(
+                condition_str,
+                position,
+                MonoTextStyle::new(&FONT_6X10, TriColor::Black),
+                centered_text_style(),
+            )
+            .draw(target);
         }
     }
 }
