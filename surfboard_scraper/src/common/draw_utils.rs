@@ -88,7 +88,7 @@ where
                 target,
             );
         }
-        WeatherCondition::NightMostlyCloudy | WeatherCondition::MostlyCloudy => {
+        WeatherCondition::NightMostlyCloudy | WeatherCondition::MostlyCloudy | WeatherCondition::NightCloudy => {
             draw_binary_image_on_tricolor(
                 &ImageRaw::<BinaryColor>::new(MOSTLY_CLOUDY, 32),
                 Point::new(position.x - 16, position.y - 16),
