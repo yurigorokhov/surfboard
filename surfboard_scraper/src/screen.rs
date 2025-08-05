@@ -10,7 +10,7 @@ use serde_json::Value;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum ScreenIdentifier {
     SurfReport24h,
-    ScreenSaver,
+    SurfReportWeek,
 }
 
 pub trait Screen<P> {

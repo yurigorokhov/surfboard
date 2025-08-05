@@ -9,8 +9,8 @@ use serde_json::Value;
 
 use crate::{
     screen::{Screen, ScreenIdentifier},
-    screensaver::ScreenSaverScreen,
     surf_report_24h::data::SurfReport24HData,
+    surf_report_week::data::SurfReportWeekData,
 };
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -38,9 +38,9 @@ impl ScreenConfiguration {
                 SurfReport24HData::from_params(&params).await?.draw_to_qoi(writer)?;
                 Ok(())
             }
-            ScreenIdentifier::ScreenSaver => {
-                let params = ScreenSaverScreen::parse_params(&self.params)?;
-                ScreenSaverScreen::from_params(&params).await?.draw_to_qoi(writer)?;
+            ScreenIdentifier::SurfReportWeek => {
+                let params = SurfReportWeekData::parse_params(&self.params)?;
+                SurfReportWeekData::from_params(&params).await?.draw_to_qoi(writer)?;
                 Ok(())
             }
         }
@@ -53,9 +53,9 @@ impl ScreenConfiguration {
                 let params = SurfReport24HData::parse_params(&self.params)?;
                 SurfReport24HData::from_params(&params).await?.draw(&mut display)?;
             }
-            ScreenIdentifier::ScreenSaver => {
-                let params = ScreenSaverScreen::parse_params(&self.params)?;
-                ScreenSaverScreen::from_params(&params).await?.draw(&mut display)?;
+            ScreenIdentifier::SurfReportWeek => {
+                let params = SurfReportWeekData::parse_params(&self.params)?;
+                SurfReportWeekData::from_params(&params).await?.draw(&mut display)?;
             }
         }
         let output_settings = OutputSettingsBuilder::new().scale(1).build();

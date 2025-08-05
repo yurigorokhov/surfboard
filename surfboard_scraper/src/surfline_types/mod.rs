@@ -1,3 +1,4 @@
+pub mod common;
 pub mod conditions;
 pub mod spot_details;
 pub mod tide;

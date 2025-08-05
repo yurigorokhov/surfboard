@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::http::fetch;
+use crate::{http::fetch, surfline_types::common::FetchParams};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WaveResult {
@@ -28,10 +28,11 @@ pub struct WaveMeasurementSurf {
     pub human_relation: String,
 }
 
-pub async fn fetch_waves(spot_id: &str) -> Result<WaveResult> {
+pub async fn fetch_waves(spot_id: &str, params: Option<FetchParams>) -> Result<WaveResult> {
+    let params = params.unwrap_or_default();
     let url = format!(
-        "https://services.surfline.com/kbyg/spots/forecasts/wave?spotId={}&days=2&intervalHours=1",
-        spot_id
+        "https://services.surfline.com/kbyg/spots/forecasts/wave?spotId={}&days={}&intervalHours={}",
+        spot_id, params.days, params.interval_hours,
     );
     fetch(url.as_str()).await
 }

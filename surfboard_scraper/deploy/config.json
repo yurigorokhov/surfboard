@@ -27,10 +27,10 @@
     ],
     "screen_saver": {
         "id": "screensaver",
-        "key": "ScreenSaver",
+        "key": "SurfReportWeek",
         "params": {
-            "path": "deploy/photo.png"
+            "spot_id": "5842041f4e65fad6a7708807"
         },
-        "url": "https://yurig-public.s3.us-east-1.amazonaws.com/screensaver-photo.qoi"
+        "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_week_5842041f4e65fad6a7708807.qoi"
     }
 }

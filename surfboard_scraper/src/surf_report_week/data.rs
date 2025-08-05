@@ -9,16 +9,11 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-const MEASUREMENTS_TIDE: usize = 36;
-const MEASUREMENTS_WAVE: usize = 10;
-const MEASUREMENTS_WIND: usize = 10;
-const MEASUREMENTS_WEATHER: usize = 10;
-
 use crate::{
     screen::Screen,
-    surf_report_24h::draw::draw,
+    surf_report_week::draw::draw,
     surfline_types::{
-        conditions::{ConditionsMeasurement, ConditionsResult, fetch_conditions},
+        common::FetchParams,
         spot_details::{SpotDetails, SpotDetailsResult, fetch_spot_details},
         tide::{TideMeasurement, TideResult, fetch_tides},
         wave::{WaveMeasurement, WaveResult, fetch_waves},
@@ -28,30 +23,32 @@ use crate::{
 };
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SurfReport24HDataParams {
+pub struct SurfReportWeekParams {
     spot_id: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SurfReport24HData {
+pub struct SurfReportWeekData {
     pub last_updated_utc: i64,
     pub waves: Vec<WaveMeasurement>,
     pub tides: Vec<TideMeasurement>,
     pub weather: Vec<WeatherMeasurement>,
     pub wind: Vec<WindMeasurement>,
-    pub conditions: ConditionsMeasurement,
     pub spot_details: SpotDetails,
 }
 
-impl Screen<SurfReport24HDataParams> for SurfReport24HData {
-    async fn from_params(params: &SurfReport24HDataParams) -> Result<Box<Self>> {
+impl Screen<SurfReportWeekParams> for SurfReportWeekData {
+    async fn from_params(params: &SurfReportWeekParams) -> Result<Box<Self>> {
         let spot_id = params.spot_id.as_str();
-        Ok(Box::new(SurfReport24HData::new_from_results(
-            fetch_waves(spot_id, None).await?,
-            fetch_tides(spot_id, None).await?,
-            fetch_weather(spot_id, None).await?,
-            fetch_wind(spot_id, None).await?,
-            fetch_conditions(spot_id, None).await?,
+        let fetch_params = FetchParams {
+            days: 7,
+            interval_hours: 6,
+        };
+        Ok(Box::new(SurfReportWeekData::new_from_results(
+            fetch_waves(spot_id, Some(fetch_params.clone())).await?,
+            fetch_tides(spot_id, Some(fetch_params.clone())).await?,
+            fetch_weather(spot_id, Some(fetch_params.clone())).await?,
+            fetch_wind(spot_id, Some(fetch_params.clone())).await?,
             fetch_spot_details(spot_id).await?,
         )))
     }
@@ -69,9 +66,9 @@ impl Screen<SurfReport24HDataParams> for SurfReport24HData {
         Ok(())
     }
 
-    fn parse_params(params: &HashMap<String, Value>) -> Result<SurfReport24HDataParams> {
+    fn parse_params(params: &HashMap<String, Value>) -> Result<SurfReportWeekParams> {
         let spot_id = params.get("spot_id").unwrap().as_str().unwrap();
-        Ok(SurfReport24HDataParams {
+        Ok(SurfReportWeekParams {
             spot_id: spot_id.into(),
         })
     }
@@ -85,50 +82,21 @@ impl Screen<SurfReport24HDataParams> for SurfReport24HData {
     }
 }
 
-impl SurfReport24HData {
+impl SurfReportWeekData {
     pub fn new_from_results(
         wave_result: WaveResult,
         tide_result: TideResult,
         weather_result: WeatherResult,
         wind_result: WindResult,
-        conditions_result: ConditionsResult,
         spot_details_result: SpotDetailsResult,
     ) -> Self {
         let now = Utc::now();
-        SurfReport24HData {
+        SurfReportWeekData {
             last_updated_utc: now.timestamp(),
-            waves: wave_result
-                .data
-                .wave
-                .into_iter()
-                .skip(6)
-                .step_by(3)
-                .take(MEASUREMENTS_WAVE)
-                .collect(),
-            tides: tide_result
-                .data
-                .tides
-                .into_iter()
-                .skip(6)
-                .take(MEASUREMENTS_TIDE)
-                .collect(),
-            weather: weather_result
-                .data
-                .weather
-                .into_iter()
-                .skip(6)
-                .step_by(3)
-                .take(MEASUREMENTS_WEATHER)
-                .collect(),
-            wind: wind_result
-                .data
-                .wind
-                .into_iter()
-                .skip(6)
-                .step_by(3)
-                .take(MEASUREMENTS_WIND)
-                .collect(),
-            conditions: conditions_result.data.conditions.into_iter().next().unwrap(),
+            waves: wave_result.data.wave.into_iter().collect(),
+            tides: tide_result.data.tides.into_iter().collect(),
+            weather: weather_result.data.weather.into_iter().step_by(3).collect(),
+            wind: wind_result.data.wind.into_iter().collect(),
             spot_details: spot_details_result.spot,
         }
     }

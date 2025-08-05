@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::http::fetch;
+use crate::{http::fetch, surfline_types::common::FetchParams};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WindResult {
@@ -13,7 +13,7 @@ pub struct WindData {
     pub wind: Vec<WindMeasurement>,
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum WindDirectionType {
     Onshore,
     Offshore,
@@ -31,10 +31,11 @@ pub struct WindMeasurement {
     pub speed: f32,
 }
 
-pub async fn fetch_wind(spot_id: &str) -> Result<WindResult> {
+pub async fn fetch_wind(spot_id: &str, params: Option<FetchParams>) -> Result<WindResult> {
+    let params = params.unwrap_or_default();
     let url = format!(
-        "https://services.surfline.com/kbyg/spots/forecasts/wind?spotId={}&days=2&intervalHours=1",
-        spot_id
+        "https://services.surfline.com/kbyg/spots/forecasts/wind?spotId={}&days={}&intervalHours={}",
+        spot_id, params.days, params.interval_hours
     );
     fetch(url.as_str()).await
 }
