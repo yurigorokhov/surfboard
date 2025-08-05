@@ -17,6 +17,7 @@ pub struct WeatherData {
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum WeatherCondition {
     NightMostlyCloudy,
+    NightCloudy,
     NightClear,
     NightFog,
     MostlyCloudy,
