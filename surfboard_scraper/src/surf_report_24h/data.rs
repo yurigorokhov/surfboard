@@ -48,10 +48,10 @@ impl Screen<SurfReport24HDataParams> for SurfReport24HData {
         let spot_id = params.spot_id.as_str();
         Ok(Box::new(SurfReport24HData::new_from_results(
             fetch_waves(spot_id, None).await?,
-            fetch_tides(spot_id).await?,
-            fetch_weather(spot_id).await?,
-            fetch_wind(spot_id).await?,
-            fetch_conditions(spot_id).await?,
+            fetch_tides(spot_id, None).await?,
+            fetch_weather(spot_id, None).await?,
+            fetch_wind(spot_id, None).await?,
+            fetch_conditions(spot_id, None).await?,
             fetch_spot_details(spot_id).await?,
         )))
     }

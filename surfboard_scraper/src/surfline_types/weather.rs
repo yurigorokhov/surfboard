@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::http::fetch;
+use crate::{http::fetch, surfline_types::common::FetchParams};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WeatherResult {
@@ -13,7 +13,7 @@ pub struct WeatherData {
     pub weather: Vec<WeatherMeasurement>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum WeatherCondition {
     NightMostlyCloudy,
@@ -41,10 +41,11 @@ pub struct WeatherMeasurement {
     pub temperature: f32,
 }
 
-pub async fn fetch_weather(spot_id: &str) -> Result<WeatherResult> {
+pub async fn fetch_weather(spot_id: &str, params: Option<FetchParams>) -> Result<WeatherResult> {
+    let params = params.unwrap_or_default();
     let url = format!(
-        "https://services.surfline.com/kbyg/spots/forecasts/weather?spotId={}&days=2&intervalHours=1",
-        spot_id
+        "https://services.surfline.com/kbyg/spots/forecasts/weather?spotId={}&days={}&intervalHours={}",
+        spot_id, params.days, params.interval_hours
     );
     fetch(url.as_str()).await
 }

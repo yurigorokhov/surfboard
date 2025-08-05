@@ -1,8 +1,9 @@
+mod common;
 mod http;
 mod image_data;
 mod screen;
-mod screensaver;
 mod surf_report_24h;
+mod surf_report_week;
 mod surfline_types;
 mod util;
 

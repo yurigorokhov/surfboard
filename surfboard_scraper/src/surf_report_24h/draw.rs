@@ -1,13 +1,15 @@
-use chrono::{Datelike, FixedOffset, NaiveDateTime, TimeZone, Timelike, Utc};
+use chrono::Timelike;
 
-use crate::image_data::{MIST, MOSTLY_CLEAR, MOSTLY_CLOUDY, SHOWERS, WAVE, WEATHER_SUNNY, WIND};
+use crate::common::draw_utils::{
+    draw_binary_image_on_tricolor, draw_last_updated, draw_weather_icon, format_wave_height,
+    format_wind_speed, get_local_time_from_unix, left_text_style,
+};
+use crate::image_data::{WAVE, WIND};
 use core::fmt::Debug;
 use core::fmt::Write;
-use embedded_graphics::image::GetPixel;
 use embedded_graphics::image::ImageRaw;
 use embedded_graphics::mono_font::ascii::{FONT_7X13, FONT_8X13, FONT_9X15, FONT_9X15_BOLD};
 use embedded_graphics::mono_font::iso_8859_10::FONT_10X20;
-use embedded_graphics::mono_font::iso_8859_16::FONT_5X8;
 use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::primitives::{Line, Polyline, PrimitiveStyle};
 use embedded_graphics::{
@@ -24,14 +26,8 @@ const TIDE_CHART_Y_BOTTOM: i32 = 220;
 const TIDE_Y_HEIGHT: i32 = TIDE_CHART_Y_BOTTOM - TIDE_CHART_Y_TOP;
 
 use crate::surf_report_24h::data::SurfReport24HData;
-use crate::surfline_types::weather::WeatherCondition;
 use crate::surfline_types::wind::WindDirectionType;
 
-fn get_local_time_from_unix(unix_timestamp: i64, offset: i32) -> NaiveDateTime {
-    let time = Utc.timestamp_opt(unix_timestamp, 0).unwrap().naive_local();
-    let offset = FixedOffset::west_opt(offset * 3600).unwrap();
-    offset.from_local_datetime(&time).unwrap().naive_utc()
-}
 
 pub fn draw<D, E>(target: &mut D, surf_report: &SurfReport24HData) -> Result<(), E>
 where
@@ -165,19 +161,14 @@ where
 {
     draw_binary_image_on_tricolor(&ImageRaw::<BinaryColor>::new(WAVE, 32), Point::new(10, y - 16), target);
 
-    // find max and min
-    let text_style = TextStyleBuilder::new()
-        .alignment(Alignment::Left)
-        .line_height(LineHeight::Percent(100))
-        .build();
+    let text_style = left_text_style();
     for data in surf_report.waves.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
-        let mut txt: String = String::new();
-        write!(txt, "{}-{}ft", data.surf.min, data.surf.max,).unwrap();
+        let wave_text = format_wave_height(data.surf.min, data.surf.max);
         Text::with_text_style(
-            txt.as_str(),
+            wave_text.as_str(),
             Point::new(x_axis - 10, y),
             MonoTextStyle::new(&FONT_9X15, TriColor::Black),
             text_style,
@@ -200,20 +191,15 @@ where
 {
     draw_binary_image_on_tricolor(&ImageRaw::<BinaryColor>::new(WIND, 32), Point::new(10, y - 16), target);
 
-    // find max and min
-    let text_style = TextStyleBuilder::new()
-        .alignment(Alignment::Left)
-        .line_height(LineHeight::Percent(100))
-        .build();
+    let text_style = left_text_style();
 
     for data in surf_report.wind.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
-        let mut txt: String = String::new();
-        write!(txt, "{:.1}kt", data.speed).unwrap();
+        let wind_text = format_wind_speed(data.speed);
         Text::with_text_style(
-            txt.as_str(),
+            wind_text.as_str(),
             Point::new(x_axis - 10, y),
             MonoTextStyle::new(&FONT_9X15, TriColor::Black),
             text_style,
@@ -272,95 +258,22 @@ where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
 {
-    // find max and min
-    // let text_style = TextStyleBuilder::new()
-    //     .alignment(Alignment::Left)
-    //     .line_height(LineHeight::Percent(100))
-    //     .build();
     for data in surf_report.weather.iter().take(10) {
         let x_axis_proportion = (data.timestamp as f64 - min_time as f64) / (max_time - min_time) as f64;
         let x_axis = (TIDE_CHART_X_LEFT as f64 + (TIDE_CHART_WIDTH as f64) * x_axis_proportion) as i32;
 
-        const IMAGE_Y_OFFSET: i32 = 32;
-        match data.condition {
-            WeatherCondition::NightClear | WeatherCondition::Clear => {
-                draw_binary_image_on_tricolor(
-                    &ImageRaw::<BinaryColor>::new(WEATHER_SUNNY, 32),
-                    Point::new(x_axis - 16, y - IMAGE_Y_OFFSET),
-                    target,
-                );
-            }
-            WeatherCondition::MostlyClear | WeatherCondition::NightMostlyClear => {
-                draw_binary_image_on_tricolor(
-                    &ImageRaw::<BinaryColor>::new(MOSTLY_CLEAR, 32),
-                    Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
-                    target,
-                );
-            }
-            WeatherCondition::NightMostlyCloudy | WeatherCondition::MostlyCloudy => {
-                draw_binary_image_on_tricolor(
-                    &ImageRaw::<BinaryColor>::new(MOSTLY_CLOUDY, 32),
-                    Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
-                    target,
-                );
-            }
-            WeatherCondition::Mist | WeatherCondition::NightMist | WeatherCondition::NightFog => {
-                draw_binary_image_on_tricolor(
-                    &ImageRaw::<BinaryColor>::new(MIST, 32),
-                    Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
-                    target,
-                );
-            }
-            WeatherCondition::NightBriefShowers
-            | WeatherCondition::BriefShowers
-            | WeatherCondition::BriefShowersPossible
-            | WeatherCondition::NightDrizzle
-            | WeatherCondition::Drizzle => {
-                draw_binary_image_on_tricolor(
-                    &ImageRaw::<BinaryColor>::new(SHOWERS, 32),
-                    Point::new(x_axis - 12, y - IMAGE_Y_OFFSET),
-                    target,
-                );
-            } // _ => {
-              //     let mut txt: String = String::new();
-              //     write!(txt, "{:?}", data.condition).unwrap();
-              //     Text::with_text_style(
-              //         txt.as_str(),
-              //         Point::new(x_axis - 10, y),
-              //         MonoTextStyle::new(&FONT_6X10, TriColor::Black),
-              //         text_style,
-              //     )
-              //     .draw(target)?;
-              // }
-        }
+        draw_weather_icon(&data.condition, Point::new(x_axis, y), target);
     }
     Ok(())
 }
 
-fn draw_binary_image_on_tricolor<D>(raw_image: &ImageRaw<BinaryColor>, top_left: Point, target: &mut D)
-where
-    D: DrawTarget<Color = TriColor>,
-{
-    for p in raw_image.bounding_box().points() {
-        let color = raw_image.pixel(p).unwrap();
-        let mapped_color = match color {
-            BinaryColor::Off => TriColor::White,
-            BinaryColor::On => TriColor::Black,
-        };
-        let _ = target.draw_iter([Pixel(top_left + p, mapped_color)]);
-    }
-}
 
 pub fn draw_headings<D, E>(target: &mut D, surf_report: &SurfReport24HData, y: i32) -> Result<(), E>
 where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
 {
-    // find max and min
-    let text_style = TextStyleBuilder::new()
-        .alignment(Alignment::Left)
-        .line_height(LineHeight::Percent(100))
-        .build();
+    let text_style = left_text_style();
     Text::with_text_style(
         surf_report.spot_details.name.as_str(),
         Point::new(10, y),
@@ -378,31 +291,3 @@ where
     Ok(())
 }
 
-pub fn draw_last_updated<D, E>(target: &mut D, last_updated: &NaiveDateTime) -> Result<(), E>
-where
-    E: Debug,
-    D: DrawTarget<Color = TriColor, Error = E>,
-{
-    let text_style = TextStyleBuilder::new()
-        .alignment(Alignment::Left)
-        .line_height(LineHeight::Percent(100))
-        .build();
-    let mut txt: String = String::new();
-    write!(
-        txt,
-        "Updated: {}/{} {:02}:{:02}",
-        last_updated.month(),
-        last_updated.day(),
-        last_updated.hour(),
-        last_updated.minute()
-    )
-    .expect("Failed to write");
-    Text::with_text_style(
-        txt.as_str(),
-        Point::new(680, 470),
-        MonoTextStyle::new(&FONT_5X8, TriColor::Black),
-        text_style,
-    )
-    .draw(target)?;
-    Ok(())
-}

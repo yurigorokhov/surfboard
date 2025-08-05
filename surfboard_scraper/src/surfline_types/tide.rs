@@ -1,7 +1,7 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-use crate::http::fetch;
+use crate::{http::fetch, surfline_types::common::FetchParams};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -52,10 +52,11 @@ pub struct TideMeasurement {
     pub utc_offset: i32,
 }
 
-pub async fn fetch_tides(spot_id: &str) -> Result<TideResult> {
+pub async fn fetch_tides(spot_id: &str, params: Option<FetchParams>) -> Result<TideResult> {
+    let params = params.unwrap_or_default();
     let url = format!(
-        "https://services.surfline.com/kbyg/spots/forecasts/tides?spotId={}&days=2",
-        spot_id
+        "https://services.surfline.com/kbyg/spots/forecasts/tides?spotId={}&days={}",
+        spot_id, params.days
     );
     fetch(url.as_str()).await
 }

@@ -11,7 +11,6 @@ use serde_json::Value;
 pub enum ScreenIdentifier {
     SurfReport24h,
     SurfReportWeek,
-    ScreenSaver,
 }
 
 pub trait Screen<P> {
