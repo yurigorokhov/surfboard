@@ -1,5 +1,5 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 use crate::{http::fetch, surfline_types::common::FetchParams};
 
@@ -13,8 +13,7 @@ pub struct WeatherData {
     pub weather: Vec<WeatherMeasurement>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+#[derive(Debug, Serialize, Clone)]
 pub enum WeatherCondition {
     NightMostlyCloudy,
     NightCloudy,
@@ -31,6 +30,34 @@ pub enum WeatherCondition {
     BriefShowersPossible,
     NightDrizzle,
     Drizzle,
+    Unknown(String),
+}
+
+impl<'de> Deserialize<'de> for WeatherCondition {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        match s.as_str() {
+            "NIGHT_MOSTLY_CLOUDY" => Ok(WeatherCondition::NightMostlyCloudy),
+            "NIGHT_CLOUDY" => Ok(WeatherCondition::NightCloudy),
+            "NIGHT_CLEAR" => Ok(WeatherCondition::NightClear),
+            "NIGHT_FOG" => Ok(WeatherCondition::NightFog),
+            "MOSTLY_CLOUDY" => Ok(WeatherCondition::MostlyCloudy),
+            "MOSTLY_CLEAR" => Ok(WeatherCondition::MostlyClear),
+            "MIST" => Ok(WeatherCondition::Mist),
+            "CLEAR" => Ok(WeatherCondition::Clear),
+            "NIGHT_MOSTLY_CLEAR" => Ok(WeatherCondition::NightMostlyClear),
+            "BRIEF_SHOWERS" => Ok(WeatherCondition::BriefShowers),
+            "NIGHT_BRIEF_SHOWERS" => Ok(WeatherCondition::NightBriefShowers),
+            "NIGHT_MIST" => Ok(WeatherCondition::NightMist),
+            "BRIEF_SHOWERS_POSSIBLE" => Ok(WeatherCondition::BriefShowersPossible),
+            "NIGHT_DRIZZLE" => Ok(WeatherCondition::NightDrizzle),
+            "DRIZZLE" => Ok(WeatherCondition::Drizzle),
+            _ => Ok(WeatherCondition::Unknown(s)),
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
