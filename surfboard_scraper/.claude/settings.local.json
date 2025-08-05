@@ -3,7 +3,8 @@
     "allow": [
       "Bash(find:*)",
       "Bash(make:*)",
-      "Bash(cargo check:*)"
+      "Bash(cargo check:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
