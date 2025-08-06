@@ -1,13 +1,17 @@
-use chrono::{Datelike, NaiveDate, TimeZone, Utc};
+use chrono::{Datelike, NaiveDate, TimeZone, Timelike, Utc};
 
 use crate::common::draw_utils::{
-    centered_text_style, draw_last_updated, draw_small_text,
-    draw_text, draw_weather_icon, format_temperature_range, format_wave_height, format_wind_speed,
-    get_local_time_from_unix,
+    centered_text_style, draw_last_updated, draw_small_text, draw_text, draw_weather_icon, format_temperature_range,
+    format_wave_height, format_wind_speed, get_local_time_from_unix,
 };
 use core::fmt::Debug;
 use embedded_graphics::mono_font::ascii::FONT_9X15_BOLD;
-use embedded_graphics::{mono_font::MonoTextStyle, prelude::*, primitives::{Line, PrimitiveStyle}, text::Text};
+use embedded_graphics::{
+    mono_font::MonoTextStyle,
+    prelude::*,
+    primitives::{Line, PrimitiveStyle},
+    text::Text,
+};
 use epd_waveshare::color::TriColor;
 use std::collections::HashMap;
 
@@ -20,15 +24,16 @@ const COLUMN_WIDTH: i32 = CHART_WIDTH / 7;
 // Better vertical centering - screen is 480px tall, footer at ~470
 // Content area: ~60px from top, ~120px from bottom = 300px content area
 // Optimized spacing with better space utilization
-const DAY_LABEL_Y: i32 = 130;        // Day names and dates
-const WAVE_DATA_Y: i32 = 195;        // Wave height data
-const WEATHER_DATA_Y: i32 = 255;     // Weather icons
+const DAY_LABEL_Y: i32 = 130; // Day names and dates
+const WAVE_DATA_Y: i32 = 195; // Wave height data
+const WEATHER_DATA_Y: i32 = 255; // Weather icons
 const TEMPERATURE_DATA_Y: i32 = 285; // Temperature text below weather icons
-const WIND_DATA_Y: i32 = 325;        // Wind speed data
+const WIND_DATA_Y: i32 = 325; // Wind speed data
+const TIDE_DATA_Y: i32 = 350; // Tide times data
 
 // Separator styling constants - span the main content area
 const SEPARATOR_TOP_Y: i32 = 100;
-const SEPARATOR_BOTTOM_Y: i32 = 345;
+const SEPARATOR_BOTTOM_Y: i32 = 370;
 
 use crate::surf_report_week::data::SurfReportWeekData;
 
@@ -47,6 +52,7 @@ where
     draw_daily_waves(target, surf_report)?;
     draw_daily_weather(target, surf_report)?;
     draw_daily_wind(target, surf_report)?;
+    draw_daily_tides(target, surf_report)?;
 
     // Draw footer
     draw_last_updated(target, &surf_report.parse_timestamp_local().unwrap())?;
@@ -73,6 +79,12 @@ struct DailyWeatherSummary {
 struct DailyWindSummary {
     date: NaiveDate,
     avg_speed: f32,
+}
+
+struct DailyTideSummary {
+    date: NaiveDate,
+    highest_tide: Option<String>, // Time of absolute highest tide
+    lowest_tide: Option<String>,  // Time of absolute lowest tide
 }
 
 fn group_waves_by_day(waves: &[crate::surfline_types::wave::WaveMeasurement]) -> Vec<DailyWaveSummary> {
@@ -118,7 +130,7 @@ fn group_weather_by_day(weather: &[crate::surfline_types::weather::WeatherMeasur
         .into_iter()
         .map(|(date, measurements)| {
             // Find measurement closest to midday (12:00) for weather condition
-            // Use local time for midday calculation 
+            // Use local time for midday calculation
             let midday_target = date.and_hms_opt(12, 0, 0).unwrap().and_utc().timestamp();
             let best_measurement = measurements
                 .iter()
@@ -130,7 +142,10 @@ fn group_weather_by_day(weather: &[crate::surfline_types::weather::WeatherMeasur
 
             // Calculate min and max temperatures for the day
             let min_temp = measurements.iter().map(|m| m.temperature).fold(f32::INFINITY, f32::min);
-            let max_temp = measurements.iter().map(|m| m.temperature).fold(f32::NEG_INFINITY, f32::max);
+            let max_temp = measurements
+                .iter()
+                .map(|m| m.temperature)
+                .fold(f32::NEG_INFINITY, f32::max);
 
             DailyWeatherSummary {
                 date,
@@ -168,6 +183,63 @@ fn group_wind_by_day(wind: &[crate::surfline_types::wind::WindMeasurement]) -> V
             }
 
             DailyWindSummary { date, avg_speed }
+        })
+        .collect();
+
+    daily_summaries.sort_by(|a, b| a.date.cmp(&b.date));
+    daily_summaries
+}
+
+fn group_tides_by_day(tides: &[crate::surfline_types::tide::TideMeasurement]) -> Vec<DailyTideSummary> {
+    let mut daily_groups: HashMap<NaiveDate, Vec<&crate::surfline_types::tide::TideMeasurement>> = HashMap::new();
+
+    // Group measurements by date using local time
+    for measurement in tides {
+        let local_time = get_local_time_from_unix(measurement.timestamp, measurement.utc_offset);
+        let date = local_time.date();
+        daily_groups.entry(date).or_insert_with(Vec::new).push(measurement);
+    }
+
+    // Convert to sorted vector with filtered high/low tides in 6AM-9PM range
+    let mut daily_summaries: Vec<DailyTideSummary> = daily_groups
+        .into_iter()
+        .map(|(date, measurements)| {
+            let mut highest_tide: Option<(String, f32)> = None;
+            let mut lowest_tide: Option<(String, f32)> = None;
+
+            for measurement in measurements {
+                let local_time = get_local_time_from_unix(measurement.timestamp, measurement.utc_offset);
+                let hour = local_time.hour();
+
+                // Only include tides between 6AM and 9PM (21:00)
+                if hour >= 5 && hour <= 21 {
+                    let time_str = format!("{}:{:02}", hour, local_time.minute());
+
+                    // Update highest tide if this is higher
+                    if let Some((_, current_highest)) = &highest_tide {
+                        if measurement.height > *current_highest {
+                            highest_tide = Some((time_str.clone(), measurement.height));
+                        }
+                    } else {
+                        highest_tide = Some((time_str.clone(), measurement.height));
+                    }
+
+                    // Update lowest tide if this is lower
+                    if let Some((_, current_lowest)) = &lowest_tide {
+                        if measurement.height < *current_lowest {
+                            lowest_tide = Some((time_str.clone(), measurement.height));
+                        }
+                    } else {
+                        lowest_tide = Some((time_str.clone(), measurement.height));
+                    }
+                }
+            }
+
+            DailyTideSummary {
+                date,
+                highest_tide: highest_tide.map(|(time, _)| time),
+                lowest_tide: lowest_tide.map(|(time, _)| time),
+            }
         })
         .collect();
 
@@ -293,6 +365,43 @@ where
     Ok(())
 }
 
+pub fn draw_daily_tides<D, E>(target: &mut D, surf_report: &SurfReportWeekData) -> Result<(), E>
+where
+    E: Debug,
+    D: DrawTarget<Color = TriColor, Error = E>,
+{
+    let daily_tides = group_tides_by_day(&surf_report.tides);
+    let text_style = centered_text_style();
+
+    for (day_index, tide_summary) in daily_tides.iter().enumerate().take(7) {
+        let x_pos = CHART_X_LEFT + (day_index as i32 * COLUMN_WIDTH) + (COLUMN_WIDTH / 2);
+
+        // Format tide times compactly with minutes: show absolute highest and lowest
+        let mut tide_lines = Vec::new();
+
+        // Show absolute highest and lowest tide times for each day
+        if let Some(highest) = &tide_summary.highest_tide {
+            tide_lines.push(format!("H {}", highest));
+        }
+
+        if let Some(lowest) = &tide_summary.lowest_tide {
+            tide_lines.push(format!("L {}", lowest));
+        }
+
+        // Draw each tide on a separate line if we have both
+        if tide_lines.len() == 2 {
+            draw_small_text(target, &tide_lines[0], Point::new(x_pos, TIDE_DATA_Y), text_style)?;
+            draw_small_text(target, &tide_lines[1], Point::new(x_pos, TIDE_DATA_Y + 15), text_style)?;
+        } else if tide_lines.len() == 1 {
+            draw_small_text(target, &tide_lines[0], Point::new(x_pos, TIDE_DATA_Y), text_style)?;
+        } else {
+            draw_small_text(target, "-", Point::new(x_pos, TIDE_DATA_Y), text_style)?;
+        }
+    }
+
+    Ok(())
+}
+
 pub fn draw_day_separators<D, E>(target: &mut D) -> Result<(), E>
 where
     E: Debug,
@@ -322,6 +431,7 @@ where
         target.draw_iter([Pixel(Point::new(x_pos, WEATHER_DATA_Y), TriColor::Black)])?;
         target.draw_iter([Pixel(Point::new(x_pos, TEMPERATURE_DATA_Y), TriColor::Black)])?;
         target.draw_iter([Pixel(Point::new(x_pos, WIND_DATA_Y), TriColor::Black)])?;
+        target.draw_iter([Pixel(Point::new(x_pos, TIDE_DATA_Y), TriColor::Black)])?;
 
         // Bottom accent dot
         target.draw_iter([Pixel(Point::new(x_pos, SEPARATOR_BOTTOM_Y + 5), TriColor::Black)])?;
@@ -329,5 +439,3 @@ where
 
     Ok(())
 }
-
-
