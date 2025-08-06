@@ -1,14 +1,12 @@
 use chrono::{Datelike, NaiveDate, TimeZone, Utc};
 
 use crate::common::draw_utils::{
-    centered_text_style, draw_binary_image_on_tricolor, draw_last_updated, draw_small_text,
+    centered_text_style, draw_last_updated, draw_small_text,
     draw_text, draw_weather_icon, format_temperature_range, format_wave_height, format_wind_speed,
+    get_local_time_from_unix,
 };
-use crate::image_data::{WAVE, WIND};
 use core::fmt::Debug;
-use embedded_graphics::image::ImageRaw;
 use embedded_graphics::mono_font::ascii::FONT_9X15_BOLD;
-use embedded_graphics::pixelcolor::BinaryColor;
 use embedded_graphics::{mono_font::MonoTextStyle, prelude::*, primitives::{Line, PrimitiveStyle}, text::Text};
 use epd_waveshare::color::TriColor;
 use std::collections::HashMap;
@@ -108,9 +106,10 @@ fn group_waves_by_day(waves: &[crate::surfline_types::wave::WaveMeasurement]) ->
 fn group_weather_by_day(weather: &[crate::surfline_types::weather::WeatherMeasurement]) -> Vec<DailyWeatherSummary> {
     let mut daily_groups: HashMap<NaiveDate, Vec<&crate::surfline_types::weather::WeatherMeasurement>> = HashMap::new();
 
-    // Group measurements by date
+    // Group measurements by date using local time
     for measurement in weather {
-        let date = Utc.timestamp_opt(measurement.timestamp, 0).unwrap().date_naive();
+        let local_time = get_local_time_from_unix(measurement.timestamp, measurement.utc_offset);
+        let date = local_time.date();
         daily_groups.entry(date).or_insert_with(Vec::new).push(measurement);
     }
 
@@ -119,10 +118,14 @@ fn group_weather_by_day(weather: &[crate::surfline_types::weather::WeatherMeasur
         .into_iter()
         .map(|(date, measurements)| {
             // Find measurement closest to midday (12:00) for weather condition
+            // Use local time for midday calculation 
             let midday_target = date.and_hms_opt(12, 0, 0).unwrap().and_utc().timestamp();
             let best_measurement = measurements
                 .iter()
-                .min_by_key(|m| (m.timestamp - midday_target).abs())
+                .min_by_key(|m| {
+                    let local_time = get_local_time_from_unix(m.timestamp, m.utc_offset);
+                    (local_time.and_utc().timestamp() - midday_target).abs()
+                })
                 .unwrap();
 
             // Calculate min and max temperatures for the day
@@ -145,9 +148,10 @@ fn group_weather_by_day(weather: &[crate::surfline_types::weather::WeatherMeasur
 fn group_wind_by_day(wind: &[crate::surfline_types::wind::WindMeasurement]) -> Vec<DailyWindSummary> {
     let mut daily_groups: HashMap<NaiveDate, Vec<&crate::surfline_types::wind::WindMeasurement>> = HashMap::new();
 
-    // Group measurements by date
+    // Group measurements by date using local time
     for measurement in wind {
-        let date = Utc.timestamp_opt(measurement.timestamp, 0).unwrap().date_naive();
+        let local_time = get_local_time_from_unix(measurement.timestamp, measurement.utc_offset);
+        let date = local_time.date();
         daily_groups.entry(date).or_insert_with(Vec::new).push(measurement);
     }
 

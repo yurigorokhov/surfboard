@@ -42,7 +42,7 @@ impl Screen<SurfReportWeekParams> for SurfReportWeekData {
         let spot_id = params.spot_id.as_str();
         let fetch_params = FetchParams {
             days: 7,
-            interval_hours: 6,
+            interval_hours: 3,
         };
         Ok(Box::new(SurfReportWeekData::new_from_results(
             fetch_waves(spot_id, Some(fetch_params.clone())).await?,
