@@ -2,7 +2,7 @@ use chrono::{Datelike, NaiveDate, TimeZone, Utc};
 
 use crate::common::draw_utils::{
     centered_text_style, draw_binary_image_on_tricolor, draw_last_updated, draw_small_text,
-    draw_text, draw_weather_icon, format_wave_height, format_wind_speed,
+    draw_text, draw_weather_icon, format_temperature_range, format_wave_height, format_wind_speed,
 };
 use crate::image_data::{WAVE, WIND};
 use core::fmt::Debug;
@@ -21,15 +21,16 @@ const COLUMN_WIDTH: i32 = CHART_WIDTH / 7;
 
 // Better vertical centering - screen is 480px tall, footer at ~470
 // Content area: ~60px from top, ~120px from bottom = 300px content area
-// Balanced spacing with good visual hierarchy
-const DAY_LABEL_Y: i32 = 140;        // Day names and dates
-const WAVE_DATA_Y: i32 = 210;        // Wave height data  
-const WEATHER_DATA_Y: i32 = 280;     // Weather icons
-const WIND_DATA_Y: i32 = 350;        // Wind speed data
+// Optimized spacing with better space utilization
+const DAY_LABEL_Y: i32 = 130;        // Day names and dates
+const WAVE_DATA_Y: i32 = 195;        // Wave height data
+const WEATHER_DATA_Y: i32 = 255;     // Weather icons
+const TEMPERATURE_DATA_Y: i32 = 285; // Temperature text below weather icons
+const WIND_DATA_Y: i32 = 325;        // Wind speed data
 
 // Separator styling constants - span the main content area
-const SEPARATOR_TOP_Y: i32 = 110;
-const SEPARATOR_BOTTOM_Y: i32 = 370;
+const SEPARATOR_TOP_Y: i32 = 100;
+const SEPARATOR_BOTTOM_Y: i32 = 345;
 
 use crate::surf_report_week::data::SurfReportWeekData;
 
@@ -67,6 +68,8 @@ struct DailyWaveSummary {
 struct DailyWeatherSummary {
     date: NaiveDate,
     condition: crate::surfline_types::weather::WeatherCondition,
+    min_temp: f32,
+    max_temp: f32,
 }
 
 struct DailyWindSummary {
@@ -115,15 +118,22 @@ fn group_weather_by_day(weather: &[crate::surfline_types::weather::WeatherMeasur
     let mut daily_summaries: Vec<DailyWeatherSummary> = daily_groups
         .into_iter()
         .map(|(date, measurements)| {
-            // Find measurement closest to midday (12:00)
+            // Find measurement closest to midday (12:00) for weather condition
             let midday_target = date.and_hms_opt(12, 0, 0).unwrap().and_utc().timestamp();
             let best_measurement = measurements
                 .iter()
                 .min_by_key(|m| (m.timestamp - midday_target).abs())
                 .unwrap();
+
+            // Calculate min and max temperatures for the day
+            let min_temp = measurements.iter().map(|m| m.temperature).fold(f32::INFINITY, f32::min);
+            let max_temp = measurements.iter().map(|m| m.temperature).fold(f32::NEG_INFINITY, f32::max);
+
             DailyWeatherSummary {
                 date,
                 condition: best_measurement.condition.clone(),
+                min_temp,
+                max_temp,
             }
         })
         .collect();
@@ -209,13 +219,6 @@ where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
 {
-    // Draw wave icon
-    draw_binary_image_on_tricolor(
-        &ImageRaw::<BinaryColor>::new(WAVE, 32),
-        Point::new(10, WAVE_DATA_Y - 16),
-        target,
-    );
-
     let daily_waves = group_waves_by_day(&surf_report.waves);
     let text_style = centered_text_style();
 
@@ -236,10 +239,17 @@ where
     D: DrawTarget<Color = TriColor, Error = E>,
 {
     let daily_weather = group_weather_by_day(&surf_report.weather);
+    let text_style = centered_text_style();
 
     for (day_index, weather_summary) in daily_weather.iter().enumerate().take(7) {
         let x_pos = CHART_X_LEFT + (day_index as i32 * COLUMN_WIDTH) + (COLUMN_WIDTH / 2);
+
+        // Draw weather icon
         draw_weather_icon(&weather_summary.condition, Point::new(x_pos, WEATHER_DATA_Y), target);
+
+        // Draw temperature text below weather icon
+        let temp_text = format_temperature_range(weather_summary.min_temp, weather_summary.max_temp);
+        draw_small_text(target, &temp_text, Point::new(x_pos, TEMPERATURE_DATA_Y), text_style)?;
     }
 
     Ok(())
@@ -250,13 +260,6 @@ where
     E: Debug,
     D: DrawTarget<Color = TriColor, Error = E>,
 {
-    // Draw wind icon
-    draw_binary_image_on_tricolor(
-        &ImageRaw::<BinaryColor>::new(WIND, 32),
-        Point::new(10, WIND_DATA_Y - 16),
-        target,
-    );
-
     let daily_wind = group_wind_by_day(&surf_report.wind);
     let text_style = centered_text_style();
 
@@ -293,11 +296,11 @@ where
 {
     // Create a thin line style for subtle separators
     let thin_line_style = PrimitiveStyle::with_stroke(TriColor::Black, 1);
-    
+
     // Draw vertical separators between day columns (but not after the last column)
     for day_index in 1..7 {
         let x_pos = CHART_X_LEFT + (day_index as i32 * COLUMN_WIDTH);
-        
+
         // Draw main vertical separator line
         Line::new(
             Point::new(x_pos, SEPARATOR_TOP_Y),
@@ -305,20 +308,21 @@ where
         )
         .into_styled(thin_line_style)
         .draw(target)?;
-        
+
         // Add small decorative elements at key intersections
         // Top accent dot
         target.draw_iter([Pixel(Point::new(x_pos, SEPARATOR_TOP_Y - 5), TriColor::Black)])?;
-        
+
         // Middle accent dots at each data row
         target.draw_iter([Pixel(Point::new(x_pos, WAVE_DATA_Y), TriColor::Black)])?;
         target.draw_iter([Pixel(Point::new(x_pos, WEATHER_DATA_Y), TriColor::Black)])?;
+        target.draw_iter([Pixel(Point::new(x_pos, TEMPERATURE_DATA_Y), TriColor::Black)])?;
         target.draw_iter([Pixel(Point::new(x_pos, WIND_DATA_Y), TriColor::Black)])?;
-        
+
         // Bottom accent dot
         target.draw_iter([Pixel(Point::new(x_pos, SEPARATOR_BOTTOM_Y + 5), TriColor::Black)])?;
     }
-    
+
     Ok(())
 }
 

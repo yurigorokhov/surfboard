@@ -157,6 +157,13 @@ pub fn format_wind_speed(speed: f32) -> String {
     speed_text
 }
 
+/// Format temperature range as a string (e.g., "65°-75°")
+pub fn format_temperature_range(min_temp: f32, max_temp: f32) -> String {
+    let mut temp_text = String::new();
+    write!(temp_text, "{:.0}-{:.0}", min_temp, max_temp).unwrap();
+    temp_text
+}
+
 /// Draw text with standard font and color
 pub fn draw_text<D, E>(
     target: &mut D,
