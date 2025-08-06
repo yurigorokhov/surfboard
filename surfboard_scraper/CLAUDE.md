@@ -14,6 +14,7 @@ Surfboard Scraper is a Rust application that generates surf report displays for 
 - `make build` - Cross-compile for ARM (Raspberry Pi target)
 - `make build CARGO_PROFILE=release` - Build optimized release version
 - `make clean` - Clean build artifacts
+- Always use make commands instead of cargo commands directly when a make command exists
 
 ### Cross-compilation Setup (for Raspberry Pi deployment)
 The project uses cross-compilation to build ARM binaries:
