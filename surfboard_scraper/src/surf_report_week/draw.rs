@@ -5,7 +5,7 @@ use crate::common::draw_utils::{
     format_wave_height, format_wind_speed, get_local_time_from_unix,
 };
 use core::fmt::Debug;
-use embedded_graphics::mono_font::ascii::FONT_9X15_BOLD;
+use embedded_graphics::mono_font::ascii::FONT_10X20;
 use embedded_graphics::{
     mono_font::MonoTextStyle,
     prelude::*,
@@ -278,13 +278,13 @@ where
         Text::with_text_style(
             weekday_name,
             Point::new(x_pos, DAY_LABEL_Y),
-            MonoTextStyle::new(&FONT_9X15_BOLD, TriColor::Black),
+            MonoTextStyle::new(&FONT_10X20, TriColor::Black),
             text_style,
         )
         .draw(target)?;
 
         // Draw date below day name
-        draw_small_text(target, &date_str, Point::new(x_pos, DAY_LABEL_Y + 20), text_style)?;
+        draw_text(target, &date_str, Point::new(x_pos, DAY_LABEL_Y + 20), text_style)?;
     }
 
     Ok(())
