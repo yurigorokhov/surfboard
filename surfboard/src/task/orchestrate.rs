@@ -48,24 +48,19 @@ async fn process_event<'a>(event: Events) {
             if let Some(config) = &state_guard.config {
                 if let Some(screen_saver) = &config.screen_saver {
                     wifi_command(WifiCommand::LoadScreen(SCREEN_SAVER_SCREEN_IDX, screen_saver.clone())).await;
-                } else {
-                    send_event(Events::ScreenSaverEnabled);
                 }
-            } else {
-                send_event(Events::ScreenSaverEnabled);
             }
         }
-        Events::ScreenSaverEnabled => {
-
-            // Update every 2 hours while in screensaver mode
-            unsafe {TIMEOUT_SECS = 3600 * 2};
+        Events::ScreenDrawn(screen_idx) => {
+            // if the screen-saver was drawn then we are part of the sleep cycle, sleep for longer
+            if screen_idx == SCREEN_SAVER_SCREEN_IDX {
+                unsafe {TIMEOUT_SECS = 3600 * 2};
+            }
         }
-
 
         // these are no-ops for now since we are not shutting down the device, ever
         Events::WifiOff => {}
         Events::DisplayOff => {}
-        Events::ScreenDrawn(_) => {}
 
         // startup
         Events::WifiConnected(_addr) => wifi_command(WifiCommand::LoadConfiguration).await,
@@ -111,10 +106,8 @@ async fn process_event<'a>(event: Events) {
         Events::PowerButtonPressed => {
             // switch to next screen
             let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-            if state_guard.screen_index != SCREEN_SAVER_SCREEN_IDX {
                 state_guard.move_to_next_screen();
                 send_event(Events::ConfigurationLoaded).await;
-            }
         }
     }
 }

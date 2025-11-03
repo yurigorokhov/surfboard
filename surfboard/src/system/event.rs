@@ -45,7 +45,6 @@ pub enum Events {
     ScreenLoaded(usize),
     OrchestratorTimeout,
     PowerButtonPressed,
-    ScreenSaverEnabled,
 }
 
 #[derive(Debug, Clone)]
