@@ -8,5 +8,13 @@ target = "thumbv6m-none-eabi" # Cortex-M0 and Cortex-M0+
 
 [env]
 DEFMT_LOG = "debug"
+
+# Yuri Gorokhov
 WIFI_SSID = "Bintang"
 WIFI_PASSWORD = "blinkski"
+DEVICE_ID = "0001"
+
+# Brian Shedden
+# WIFI_SSID = ""
+# WIFI_PASSWORD = ""
+# DEVICE_ID = "0002"

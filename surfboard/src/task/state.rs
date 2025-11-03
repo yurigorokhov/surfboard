@@ -44,10 +44,6 @@ impl ProgramState {
     }
 
     pub fn move_to_next_screen(&mut self) {
-        // special shutdown (screensaver) index
-        if self.screen_index == SCREEN_SAVER_SCREEN_IDX {
-            return;
-        }
         if let Some(idx) = self.next_screen_idx() {
             self.screen_index = idx;
         } else {

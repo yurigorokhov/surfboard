@@ -44,6 +44,13 @@ async fn net_task(runner: &'static mut Runner<'static, cyw43::NetDriver<'static>
     runner.run().await
 }
 
+
+pub static CONFIG_LOCATION: &'static str = concat!(
+      "https://yurig-public.s3.us-east-1.amazonaws.com/",
+      env!("DEVICE_ID"),
+      ".json"
+  );
+
 #[embassy_executor::task]
 pub async fn start(r: WifiResources, spawner: Spawner) {
     debug!("Initializing wifi");
@@ -161,7 +168,7 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     let http_provider = HttpClientProvider::new(*stack);
 
                     let config: Configuration = http_provider
-                        .get_as_json("https://yurig-public.s3.us-east-1.amazonaws.com/config.json")
+                        .get_as_json(CONFIG_LOCATION)
                         .await
                         .unwrap();
 

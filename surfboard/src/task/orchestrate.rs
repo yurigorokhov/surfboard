@@ -8,20 +8,27 @@ use crate::{
     },
     task::{
         display::display_command,
-        power::POWER_DOWN_SIGNAL,
         state::{SCREEN_SAVER_SCREEN_IDX, STATE_MANAGER_MUTEX},
         wifi::wifi_command,
     },
 };
+
+
+static SCREENSAVER_TIMEOUT: u64 = 120;
+static mut TIMEOUT_SECS: u64 = SCREENSAVER_TIMEOUT;
+
 
 /// Main coordination task that implements the system's event loop
 #[embassy_executor::task]
 pub async fn start() {
     loop {
         let event_future = wait();
-        let timeout = Timer::after_secs(120);
+        let timeout = Timer::after_secs(unsafe {TIMEOUT_SECS});
         match select(event_future, timeout).await {
             embassy_futures::select::Either::First(event) => {
+
+                // reset timeout to 2 min
+                unsafe {TIMEOUT_SECS = SCREENSAVER_TIMEOUT};
                 process_event(event).await;
             }
             embassy_futures::select::Either::Second(_) => {
@@ -33,7 +40,7 @@ pub async fn start() {
 
 async fn process_event<'a>(event: Events) {
     match event {
-        // shutdown sequence
+        // Load screensaveer on timeout
         Events::OrchestratorTimeout => {
             // fetch screensaver
             let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
@@ -41,21 +48,19 @@ async fn process_event<'a>(event: Events) {
             if let Some(config) = &state_guard.config {
                 if let Some(screen_saver) = &config.screen_saver {
                     wifi_command(WifiCommand::LoadScreen(SCREEN_SAVER_SCREEN_IDX, screen_saver.clone())).await;
-                } else {
-                    wifi_command(WifiCommand::PowerOffWifi).await
                 }
-            } else {
-                wifi_command(WifiCommand::PowerOffWifi).await
             }
         }
         Events::ScreenDrawn(screen_idx) => {
-            // if the screen-saver was drawn then we are part of the shutdown cycle
+            // if the screen-saver was drawn then we are part of the sleep cycle, sleep for longer
             if screen_idx == SCREEN_SAVER_SCREEN_IDX {
-                wifi_command(WifiCommand::PowerOffWifi).await
+                unsafe {TIMEOUT_SECS = 3600 * 2};
             }
         }
-        Events::WifiOff => display_command(DisplayCommand::DisplayPowerOff).await,
-        Events::DisplayOff => POWER_DOWN_SIGNAL.signal(()),
+
+        // these are no-ops for now since we are not shutting down the device, ever
+        Events::WifiOff => {}
+        Events::DisplayOff => {}
 
         // startup
         Events::WifiConnected(_addr) => wifi_command(WifiCommand::LoadConfiguration).await,
@@ -101,10 +106,8 @@ async fn process_event<'a>(event: Events) {
         Events::PowerButtonPressed => {
             // switch to next screen
             let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-            if state_guard.screen_index != SCREEN_SAVER_SCREEN_IDX {
                 state_guard.move_to_next_screen();
                 send_event(Events::ConfigurationLoaded).await;
-            }
         }
     }
 }
