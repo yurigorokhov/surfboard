@@ -51,6 +51,9 @@ pub static CONFIG_LOCATION: &'static str = concat!(
       ".json"
   );
 
+const MAX_RETRIES: u32 = 3;
+const RETRY_DELAY_MS: u64 = 2000;
+
 #[embassy_executor::task]
 pub async fn start(r: WifiResources, spawner: Spawner) {
     debug!("Initializing wifi");
@@ -161,22 +164,35 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
                     control
                         .set_power_management(cyw43::PowerManagementMode::Performance)
                         .await;
+
                     #[cfg(feature = "fake_responses")]
                     let http_provider = FakeHttpClient::default();
 
                     #[cfg(not(feature = "fake_responses"))]
                     let http_provider = HttpClientProvider::new(*stack);
 
-                    let config: Configuration = http_provider
-                        .get_as_json(CONFIG_LOCATION)
-                        .await
-                        .unwrap();
+                    let mut config_result: Option<Configuration> = None;
 
-                    {
-                        let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
-                        state_guard.config = Some(config);
+                    for attempt in 0..MAX_RETRIES {
+                        if let Some(config) = http_provider.get_as_json(CONFIG_LOCATION).await {
+                            config_result = Some(config);
+                            break;
+                        }
+
+                        if attempt < MAX_RETRIES - 1 {
+                            Timer::after_millis(RETRY_DELAY_MS).await;
+                        }
                     }
-                    send_event(Events::ConfigurationLoaded).await;
+
+                    if let Some(config) = config_result {
+                        {
+                            let mut state_guard = STATE_MANAGER_MUTEX.lock().await;
+                            state_guard.config = Some(config);
+                        }
+                        send_event(Events::ConfigurationLoaded).await;
+                    } else {
+                        send_error("Failed to load configuration").await;
+                    }
                 }
                 WifiCommand::LoadScreen(screen_idx, screen_configuration) => {
                     control
@@ -193,7 +209,20 @@ pub async fn start(r: WifiResources, spawner: Spawner) {
 
                     // get mutable buffer to store screen data into
                     if let Some(buffer) = state_guard.get_mut_buffer_for_screen(screen_idx) {
-                        if let Some(_) = http_provider.get(screen_configuration.url.as_str(), buffer).await {
+                        let mut success = false;
+
+                        for attempt in 0..MAX_RETRIES {
+                            if http_provider.get(screen_configuration.url.as_str(), buffer).await.is_some() {
+                                success = true;
+                                break;
+                            }
+
+                            if attempt < MAX_RETRIES - 1 {
+                                Timer::after_millis(RETRY_DELAY_MS).await;
+                            }
+                        }
+
+                        if success {
                             send_event(Events::ScreenLoaded(screen_idx)).await;
                         } else {
                             send_error("Failed to fetch screen").await;
