@@ -1,20 +1,20 @@
 {
     "screens": [
         {
+            "id": "surf-report-24h-steamer",
+            "key": "SurfReport24h",
+            "params": {
+                "spot_id": "5842041f4e65fad6a7708805"
+            },
+            "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_5842041f4e65fad6a7708805.qoi"
+        },
+        {
             "id": "surf-report-24h-pleasure-point",
             "key": "SurfReport24h",
             "params": {
                 "spot_id": "5842041f4e65fad6a7708807"
             },
             "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_5842041f4e65fad6a7708807.qoi"
-        },
-        {
-            "id": "surf-report-24h-hook",
-            "key": "SurfReport24h",
-            "params": {
-                "spot_id": "584204204e65fad6a7709996"
-            },
-            "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_584204204e65fad6a7709996.qoi"
         },
         {
             "id": "surf-report-24h-4mile",
@@ -26,11 +26,11 @@
         }
     ],
     "screen_saver": {
-        "id": "screensaver",
+        "id": "screensaver-steamer",
         "key": "SurfReportWeek",
         "params": {
-            "spot_id": "5842041f4e65fad6a7708807"
+            "spot_id": "5842041f4e65fad6a7708805"
         },
-        "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_week_5842041f4e65fad6a7708807.qoi"
+        "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_week_5842041f4e65fad6a7708805.qoi"
     }
 }
