@@ -1,4 +1,5 @@
-CARGO_PROFILE?=dev
+CARGO_PROFILE?=release
+BUILD_PROFILE=$(if $(filter dev,$(CARGO_PROFILE)),debug,$(CARGO_PROFILE))
 
 .PHONY: build test clean package
 
@@ -21,8 +22,8 @@ package: build
 	mkdir -p ${TMP_DIR}/surfboard_scraper/deploy/configs
 	cp deploy/configs/*.json ${TMP_DIR}/surfboard_scraper/deploy/configs/
 	cp deploy/photo.png ${TMP_DIR}/surfboard_scraper/deploy/
-	cp target/armv7-unknown-linux-musleabihf/release/surfboard_scraper ${TMP_DIR}/surfboard_scraper/
-	tar --no-xattrs -czvf surfboard_scraper.tar.gz -C ${TMP_DIR} .
+	cp target/armv7-unknown-linux-musleabihf/${BUILD_PROFILE}/surfboard_scraper ${TMP_DIR}/surfboard_scraper/
+	COPYFILE_DISABLE=1 tar --no-xattrs --exclude='._*' -czvf surfboard_scraper.tar.gz -C ${TMP_DIR} .
 	rm -rf ${TMP_DIR}
 
 deploy-scraper: package
