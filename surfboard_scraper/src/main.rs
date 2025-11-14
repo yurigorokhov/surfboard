@@ -54,7 +54,7 @@ pub async fn upload_bytes(
         .unwrap())
 }
 
-const CONFIG_DIRECTORY: &'static str = "deploy/configs/";
+const CONFIG_DIRECTORY: &'static str = "deploy/configs";
 
 #[tokio::main]
 async fn main() -> Result<()> {
