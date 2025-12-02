@@ -6,7 +6,7 @@ use surfboard_scraper::device_config::Configuration;
 #[tokio::test]
 async fn test_draw_screns() {
     let config: Configuration = serde_json::from_str(
-        fs::read_to_string("deploy/config.json")
+        fs::read_to_string("deploy/configs/0001.json")
             .await
             .expect("Failed ot read config.json")
             .as_str(),
@@ -30,7 +30,7 @@ async fn test_draw_screns() {
 #[tokio::test]
 async fn test_draw_screns_qoi() {
     let config: Configuration = serde_json::from_str(
-        fs::read_to_string("deploy/config.json")
+        fs::read_to_string("deploy/configs/0001.json")
             .await
             .expect("Failed ot read config.json")
             .as_str(),

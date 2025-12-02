@@ -1,5 +1,6 @@
 pub mod common;
 pub mod device_config;
+pub mod message;
 pub mod http;
 pub mod image_data;
 pub mod screen;

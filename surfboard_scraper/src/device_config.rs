@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 use crate::{
+    message::data::MessageData,
     screen::{Screen, ScreenIdentifier},
     surf_report_24h::data::SurfReport24HData,
     surf_report_week::data::SurfReportWeekData,
@@ -43,6 +44,11 @@ impl ScreenConfiguration {
                 SurfReportWeekData::from_params(&params).await?.draw_to_qoi(writer)?;
                 Ok(())
             }
+            ScreenIdentifier::Message => {
+                let params = MessageData::parse_params(&self.params)?;
+                MessageData::from_params(&params).await?.draw_to_qoi(writer)?;
+                Ok(())
+            }
         }
     }
 
@@ -56,6 +62,10 @@ impl ScreenConfiguration {
             ScreenIdentifier::SurfReportWeek => {
                 let params = SurfReportWeekData::parse_params(&self.params)?;
                 SurfReportWeekData::from_params(&params).await?.draw(&mut display)?;
+            }
+            ScreenIdentifier::Message => {
+                let params = MessageData::parse_params(&self.params)?;
+                MessageData::from_params(&params).await?.draw(&mut display)?;
             }
         }
         let output_settings = OutputSettingsBuilder::new().scale(1).build();
