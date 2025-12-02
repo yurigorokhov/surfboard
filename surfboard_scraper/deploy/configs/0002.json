@@ -32,5 +32,13 @@
             "spot_id": "5842041f4e65fad6a7708805"
         },
         "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_week_5842041f4e65fad6a7708805.qoi"
+    },
+    "screen_saver_bday": {
+        "id": "screensaver",
+        "key": "Message",
+        "params": {
+            "message": "Happy Birthday Brian!"
+        },
+        "url": "https://yurig-public.s3.us-east-1.amazonaws.com/surf_report_week_5842041f4e65fad6a7708805.qoi"
     }
 }
