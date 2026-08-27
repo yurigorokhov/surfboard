@@ -1,0 +1,22 @@
+# Build environment for cross-compiling the scraper to the Raspberry Pi, run via
+# Apple `container`. Alpine is musl-based, so a native arm64 image on Apple
+# Silicon builds the aarch64-unknown-linux-musl target with no emulation.
+FROM rust:alpine
+
+# aws-lc-rs needs a C toolchain + libclang (bindgen); cmake/perl/make build the
+# aws-lc C sources. musl-dev/linux-headers provide the static musl libc + headers.
+RUN apk add --no-cache \
+        musl-dev \
+        linux-headers \
+        clang \
+        clang-dev \
+        llvm-dev \
+        cmake \
+        make \
+        perl \
+        gcc \
+        g++
+
+RUN rustup target add aarch64-unknown-linux-musl
+
+WORKDIR /project

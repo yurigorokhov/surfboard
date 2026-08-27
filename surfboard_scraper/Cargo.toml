@@ -14,7 +14,9 @@ serde_json = { version = "1.0.140" }
 tokio = { version = "1.46.1", features = ["full"] }
 aws-config = { version = "1.8.1", features = ["behavior-version-latest"] }
 aws-sdk-s3 = "1.96.0"
-aws-lc-rs = { version = "1", features = ["bindgen"] }
+# aarch64-unknown-linux-musl ships pregenerated bindings, so no bindgen/libclang
+# needed (the bindgen feature required a dlopen-capable host, which static musl is not).
+aws-lc-rs = { version = "1" }
 embedded-graphics = { version = "0.8.1" }
 embedded-graphics-simulator = { version = "0.7.0", default-features = false }
 epd-waveshare = { version = "0.6.0" }
