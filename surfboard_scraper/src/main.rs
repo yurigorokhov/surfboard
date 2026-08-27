@@ -67,7 +67,13 @@ async fn main() -> Result<()> {
         .profile_name("yurigorokhov")
         .load()
         .await;
-    let client = Client::new(&config);
+    // Only calculate request checksums when the operation requires it. The default
+    // (when_supported) CRC32s every PutObject via the `crc-fast` crate, whose PMULL
+    // path SIGILLs on the Raspberry Pi 4's Cortex-A72 (no pmull) under static musl.
+    let s3_config = aws_sdk_s3::config::Builder::from(&config)
+        .request_checksum_calculation(aws_sdk_s3::config::RequestChecksumCalculation::WhenRequired)
+        .build();
+    let client = Client::from_conf(s3_config);
 
     loop {
 
